@@ -16,11 +16,14 @@ export async function fetchRemoteTracks(): Promise<Track[]> {
   const raw = await res.text()
   const text = raw.split('\n').filter(line => !line.trim().startsWith('import ')).join('\n')
 
-  // Find the start of the array via bracket matching
-  const exportIdx = text.search(/export\s+const\s+tracks[^=]*=\s*\[/)
+  // Find the = sign after "export const tracks", then find the [ that follows
+  const exportIdx = text.search(/export\s+const\s+tracks/)
   if (exportIdx === -1) throw new Error('Could not find tracks export')
 
-  const startIdx = text.indexOf('[', exportIdx)
+  const equalIdx = text.indexOf('=', exportIdx)
+  if (equalIdx === -1) throw new Error('Could not find = after tracks')
+
+  const startIdx = text.indexOf('[', equalIdx)
   let depth = 0
   let endIdx = -1
   for (let i = startIdx; i < text.length; i++) {
