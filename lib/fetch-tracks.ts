@@ -12,7 +12,9 @@ export async function fetchRemoteTracks(): Promise<Track[]> {
 
   const res = await fetch('https://work.nesslabs.cn/tracks.ts', { cache: 'no-store' })
   if (!res.ok) throw new Error(`Failed to fetch tracks: ${res.status}`)
-  const text = await res.text()
+  // Strip import lines so Function() can evaluate the array
+  const raw = await res.text()
+  const text = raw.split('\n').filter(line => !line.trim().startsWith('import ')).join('\n')
 
   // Find the start of the array via bracket matching
   const exportIdx = text.search(/export\s+const\s+tracks[^=]*=\s*\[/)
