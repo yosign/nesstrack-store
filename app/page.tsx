@@ -126,7 +126,7 @@ function HeroDataPanel() {
   const scale = Math.min((CW - PAD * 2) / maxW, (CH - PAD * 2) / maxH)
   const rw = maxW * scale, rh = maxH * scale
   const rx = (CW - rw) / 2, ry = (CH - rh) / 2
-  const r = Math.min(rw, rh) * 0.18 // corner radius
+  const r = 0 // no corner radius - sharp track outline
 
   return (
     <div
@@ -501,7 +501,7 @@ export default function HomePage() {
       ═══════════════════════════════════════════════════════════════════════ */}
       <section
         className="relative overflow-hidden"
-        style={{ minHeight: '75svh', display: 'flex', alignItems: 'center' }}
+        style={{ minHeight: '55svh', display: 'flex', alignItems: 'center' }}
       >
         {/* Background layers */}
         <GridBg opacity={0.035} />
