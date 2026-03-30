@@ -318,19 +318,7 @@ function TrackCard({ track }: { track: Track }) {
           alt={displayName}
           className={`transition-transform duration-400 group-hover:scale-105 ${imgClass}`}
         />
-        {/* Diagonal cut top-right */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: 0,
-            height: 0,
-            borderStyle: 'solid',
-            borderWidth: '0 24px 24px 0',
-            borderColor: `transparent rgba(0,180,216,0.6) transparent transparent`,
-          }}
-        />
+
       </div>
 
       {/* Info bar */}
