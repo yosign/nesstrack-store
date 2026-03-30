@@ -385,17 +385,14 @@ export default function HomePage() {
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
           {/* Logo */}
-          <div
-            style={{
-              fontFamily: 'var(--font-bebas)',
-              fontSize: '1.6rem',
-              letterSpacing: '0.08em',
-              lineHeight: 1,
-              flexShrink: 0,
-            }}
-          >
-            NessRC<span style={{ color: ACCENT }}>.net</span>
-          </div>
+          <Link href="/" style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/Logo.png"
+              alt="NessRC"
+              style={{ height: 36, width: 'auto', display: 'block' }}
+            />
+          </Link>
 
           {/* Nav */}
           <nav className="hidden md:flex items-center gap-8">
@@ -852,7 +849,8 @@ export default function HomePage() {
                 lineHeight: 1,
               }}
             >
-              NessRC<span style={{ color: ACCENT }}>.net</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/Logo.png" alt="NessRC" style={{ height: 28, width: 'auto', display: 'block' }} />
             </div>
             <p
               style={{
