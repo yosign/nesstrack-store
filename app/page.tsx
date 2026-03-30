@@ -94,80 +94,58 @@ function GridBg({ opacity = 0.04 }: { opacity?: number }) {
   )
 }
 
-// ─── Hero data panel ──────────────────────────────────────────────────────────
+// ─── Hero drift card ──────────────────────────────────────────────────────────
 function HeroDataPanel() {
-  const rows = [
-    { label: '3', sub: 'MATERIALS' },
-    { label: '50+', sub: 'TRACKS' },
-    { label: '¥500+', sub: 'FREE SHIPPING' },
-  ]
   return (
     <div
-      className="hidden lg:flex flex-col justify-center gap-0"
+      className="hidden lg:block relative flex-shrink-0 rounded-2xl overflow-hidden"
       style={{
-        borderLeft: `2px solid rgba(0,180,216,0.2)`,
-        paddingLeft: '2.5rem',
+        width: 320,
+        height: 224,
+        boxShadow: `0 0 0 1.5px rgba(0,180,216,0.5), 0 0 50px rgba(0,180,216,0.25)`,
       }}
     >
-      {rows.map(({ label, sub }, i) => (
-        <div
-          key={i}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1.25rem',
-            padding: '1.5rem 0',
-            borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-          }}
-        >
-          <div
-            style={{
-              width: 3,
-              alignSelf: 'stretch',
-              background: ACCENT,
-              flexShrink: 0,
-              opacity: 0.85,
-            }}
-          />
-          <div>
-            <div
-              style={{
-                fontFamily: 'var(--font-bebas)',
-                fontSize: 'clamp(2.5rem, 4vw, 3.5rem)',
-                color: '#fff',
-                lineHeight: 1,
-                letterSpacing: '0.02em',
-              }}
-            >
-              {label}
-            </div>
-            <div
-              style={{
-                fontSize: '0.6rem',
-                letterSpacing: '0.22em',
-                color: 'rgba(255,255,255,0.38)',
-                marginTop: 4,
-                fontFamily: 'var(--font-dm-sans)',
-              }}
-            >
-              {sub}
-            </div>
-          </div>
-        </div>
-      ))}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/images/drift.jpg"
+        alt="RC drift"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+      {/* bottom label */}
       <div
         style={{
-          marginTop: '1rem',
-          fontSize: '0.62rem',
-          letterSpacing: '0.14em',
-          color: 'rgba(255,255,255,0.25)',
-          fontFamily: 'var(--font-dm-sans)',
-          paddingTop: '1rem',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: '1rem 1.25rem 0.75rem',
+          background: 'linear-gradient(to top, rgba(8,8,8,0.9) 0%, transparent 100%)',
         }}
       >
-        FREE SHIPPING ON ORDERS OVER ¥500
+        <span
+          style={{
+            fontFamily: 'var(--font-bebas)',
+            fontSize: '0.85rem',
+            letterSpacing: '0.18em',
+            color: ACCENT,
+          }}
+        >
+          RC DRIFT · IN ACTION
+        </span>
       </div>
+      {/* top-right corner cut */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: 0,
+          height: 0,
+          borderStyle: 'solid',
+          borderWidth: '0 28px 28px 0',
+          borderColor: `transparent rgba(0,180,216,0.7) transparent transparent`,
+        }}
+      />
     </div>
   )
 }
