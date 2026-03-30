@@ -1,15 +1,15 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { getTrackDisplayName } from '@/lib/types'
 import type { Track } from '@/lib/types'
 
-const ORANGE = '#FF4500'
+const ACCENT = '#00B4D8'
 
 // ─── Size filter logic ────────────────────────────────────────────────────────
 type SizeFilter = 'all' | 'small' | 'medium' | 'large'
+type MaterialFilter = 'all' | 'PVC' | 'CLOTH' | 'BRICK-A'
 
 function getShortSide(trackName: string): number | null {
   const m = trackName.match(/^(\d+\.?\d*)[xX×](\d+\.?\d*)/)
@@ -19,7 +19,13 @@ function getShortSide(trackName: string): number | null {
   return Math.min(a, b)
 }
 
-function matchesFilter(track: Track, filter: SizeFilter): boolean {
+function getFirstDim(trackName: string): number {
+  const m = trackName.match(/(\d+\.?\d*)/)
+  if (!m) return 0
+  return parseFloat(m[1])
+}
+
+function matchesSizeFilter(track: Track, filter: SizeFilter): boolean {
   if (filter === 'all') return true
   const s = getShortSide(track.name)
   if (s === null) return true
@@ -27,6 +33,18 @@ function matchesFilter(track: Track, filter: SizeFilter): boolean {
   if (filter === 'medium') return s >= 1.0 && s <= 1.5
   if (filter === 'large') return s > 1.5
   return true
+}
+
+function groupByWidth(tracks: Track[]): { width: number; items: Track[] }[] {
+  const map = new Map<number, Track[]>()
+  for (const track of tracks) {
+    const w = getFirstDim(track.name)
+    if (!map.has(w)) map.set(w, [])
+    map.get(w)!.push(track)
+  }
+  return [...map.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([width, items]) => ({ width, items }))
 }
 
 // ─── Noise overlay ────────────────────────────────────────────────────────────
@@ -76,100 +94,80 @@ function GridBg({ opacity = 0.04 }: { opacity?: number }) {
   )
 }
 
-// ─── RC circuit SVG ───────────────────────────────────────────────────────────
-function CircuitDiagram() {
+// ─── Hero data panel ──────────────────────────────────────────────────────────
+function HeroDataPanel() {
+  const rows = [
+    { label: '3', sub: 'MATERIALS' },
+    { label: '50+', sub: 'TRACKS' },
+    { label: '¥500+', sub: 'FREE SHIPPING' },
+  ]
   return (
     <div
-      className="relative w-full h-full rounded-lg overflow-hidden"
+      className="hidden lg:flex flex-col justify-center gap-0"
       style={{
-        background: '#0d0d0d',
-        border: `1px solid rgba(255,69,0,0.35)`,
-        boxShadow: `0 0 40px rgba(255,69,0,0.12), inset 0 0 60px rgba(0,0,0,0.6)`,
+        borderLeft: `2px solid rgba(0,180,216,0.2)`,
+        paddingLeft: '2.5rem',
       }}
     >
-      {/* Corner label */}
+      {rows.map(({ label, sub }, i) => (
+        <div
+          key={i}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.25rem',
+            padding: '1.5rem 0',
+            borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+          }}
+        >
+          <div
+            style={{
+              width: 3,
+              alignSelf: 'stretch',
+              background: ACCENT,
+              flexShrink: 0,
+              opacity: 0.85,
+            }}
+          />
+          <div>
+            <div
+              style={{
+                fontFamily: 'var(--font-bebas)',
+                fontSize: 'clamp(2.5rem, 4vw, 3.5rem)',
+                color: '#fff',
+                lineHeight: 1,
+                letterSpacing: '0.02em',
+              }}
+            >
+              {label}
+            </div>
+            <div
+              style={{
+                fontSize: '0.6rem',
+                letterSpacing: '0.22em',
+                color: 'rgba(255,255,255,0.38)',
+                marginTop: 4,
+                fontFamily: 'var(--font-dm-sans)',
+              }}
+            >
+              {sub}
+            </div>
+          </div>
+        </div>
+      ))}
       <div
         style={{
-          position: 'absolute',
-          top: 14,
-          right: 14,
-          fontFamily: 'var(--font-bebas)',
-          fontSize: '0.7rem',
-          letterSpacing: '0.15em',
-          color: ORANGE,
-          border: `1px solid rgba(255,69,0,0.4)`,
-          padding: '2px 8px',
-          zIndex: 10,
+          marginTop: '1rem',
+          fontSize: '0.62rem',
+          letterSpacing: '0.14em',
+          color: 'rgba(255,255,255,0.25)',
+          fontFamily: 'var(--font-dm-sans)',
+          paddingTop: '1rem',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        1:24 SCALE
+        FREE SHIPPING ON ORDERS OVER ¥500
       </div>
-
-      {/* Size data bottom */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 14,
-          left: 14,
-          fontFamily: 'var(--font-bebas)',
-          fontSize: '1rem',
-          letterSpacing: '0.12em',
-          color: 'rgba(255,255,255,0.55)',
-          zIndex: 10,
-        }}
-      >
-        1.5 × 2.2 m
-      </div>
-
-      {/* Grid */}
-      <GridBg opacity={0.06} />
-
-      {/* Circuit SVG */}
-      <svg
-        viewBox="0 0 400 300"
-        style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
-        fill="none"
-      >
-        {/* Outer track boundary */}
-        <path
-          d="M 60 80 Q 60 40 100 40 L 300 40 Q 340 40 340 80 L 340 220 Q 340 260 300 260 L 100 260 Q 60 260 60 220 Z"
-          stroke="rgba(255,69,0,0.25)"
-          strokeWidth="1"
-          fill="none"
-        />
-        {/* Inner track boundary */}
-        <path
-          d="M 110 100 Q 110 80 130 80 L 270 80 Q 290 80 290 100 L 290 200 Q 290 220 270 220 L 130 220 Q 110 220 110 200 Z"
-          stroke="rgba(255,69,0,0.15)"
-          strokeWidth="0.5"
-          fill="none"
-        />
-        {/* Race line */}
-        <path
-          d="M 85 80 Q 85 58 108 58 L 292 58 Q 315 58 315 82 L 315 218 Q 315 242 292 242 L 108 242 Q 85 242 85 218 Z"
-          stroke={ORANGE}
-          strokeWidth="2.5"
-          fill="none"
-          strokeDasharray="0"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* Start/finish line */}
-        <line x1="85" y1="150" x2="60" y2="150" stroke={ORANGE} strokeWidth="2" />
-        <rect x="60" y="142" width="10" height="16" fill="rgba(255,69,0,0.2)" stroke={ORANGE} strokeWidth="0.5" />
-        {/* Apex markers */}
-        <circle cx="200" cy="58" r="3" fill="rgba(255,69,0,0.5)" />
-        <circle cx="315" cy="150" r="3" fill="rgba(255,69,0,0.5)" />
-        <circle cx="200" cy="242" r="3" fill="rgba(255,69,0,0.5)" />
-        <circle cx="85" cy="150" r="3" fill={ORANGE} />
-        {/* Dimension lines */}
-        <line x1="60" y1="280" x2="340" y2="280" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-        <line x1="60" y1="275" x2="60" y2="285" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-        <line x1="340" y1="275" x2="340" y2="285" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-        <line x1="360" y1="40" x2="360" y2="260" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-        <line x1="355" y1="40" x2="365" y2="40" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-        <line x1="355" y1="260" x2="365" y2="260" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-      </svg>
     </div>
   )
 }
@@ -197,12 +195,33 @@ function TrackGridSkeleton() {
 
 // ─── Track card ───────────────────────────────────────────────────────────────
 function TrackCard({ track }: { track: Track }) {
-  const ref = useRef<HTMLAnchorElement>(null)
+  const cardRef = useRef<HTMLAnchorElement>(null)
+  const imgRef = useRef<HTMLImageElement>(null)
   const displayName = getTrackDisplayName(track)
+  const [imageState, setImageState] = useState({ isPortrait: false, isThin: false })
+
+  useEffect(() => {
+    const img = imgRef.current
+    if (!img) return
+    const check = () => {
+      const { naturalWidth: w, naturalHeight: h } = img
+      if (!w || !h) return
+      setImageState({ isPortrait: h > w, isThin: h / w > 16 / 9 })
+    }
+    if (img.complete) check()
+    img.addEventListener('load', check)
+    return () => img.removeEventListener('load', check)
+  }, [track.thumbnailUrl])
+
+  const imgClass = imageState.isPortrait
+    ? imageState.isThin
+      ? '-rotate-90 w-auto h-[177.78%]'
+      : '-rotate-90 w-[56.25%] h-auto'
+    : 'w-full h-auto'
 
   return (
     <Link
-      ref={ref}
+      ref={cardRef}
       href={`/order?track=${track.id}`}
       className="group block overflow-hidden"
       style={{
@@ -211,27 +230,29 @@ function TrackCard({ track }: { track: Track }) {
         transition: 'border-color 0.25s, box-shadow 0.25s',
       }}
       onMouseEnter={() => {
-        if (ref.current) {
-          ref.current.style.borderColor = 'rgba(255,69,0,0.5)'
-          ref.current.style.boxShadow = '0 0 24px rgba(255,69,0,0.2)'
+        if (cardRef.current) {
+          cardRef.current.style.borderColor = 'rgba(0,180,216,0.5)'
+          cardRef.current.style.boxShadow = '0 0 24px rgba(0,180,216,0.2)'
         }
       }}
       onMouseLeave={() => {
-        if (ref.current) {
-          ref.current.style.borderColor = 'rgba(255,255,255,0.06)'
-          ref.current.style.boxShadow = 'none'
+        if (cardRef.current) {
+          cardRef.current.style.borderColor = 'rgba(255,255,255,0.06)'
+          cardRef.current.style.boxShadow = 'none'
         }
       }}
     >
       {/* Thumbnail */}
-      <div className="aspect-video relative overflow-hidden" style={{ background: '#0d0d0d' }}>
-        <Image
+      <div
+        className="aspect-video overflow-hidden flex items-center justify-center"
+        style={{ background: '#0d0d0d', position: 'relative' }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={imgRef}
           src={track.thumbnailUrl}
           alt={displayName}
-          fill
-          className="object-cover transition-transform duration-400 group-hover:scale-105"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          unoptimized
+          className={`transition-transform duration-400 group-hover:scale-105 ${imgClass}`}
         />
         {/* Diagonal cut top-right */}
         <div
@@ -243,7 +264,7 @@ function TrackCard({ track }: { track: Track }) {
             height: 0,
             borderStyle: 'solid',
             borderWidth: '0 24px 24px 0',
-            borderColor: `transparent rgba(255,69,0,0.6) transparent transparent`,
+            borderColor: `transparent rgba(0,180,216,0.6) transparent transparent`,
           }}
         />
       </div>
@@ -288,7 +309,7 @@ function TrackCard({ track }: { track: Track }) {
             fontFamily: 'var(--font-bebas)',
             fontSize: '1.1rem',
             letterSpacing: '0.08em',
-            color: ORANGE,
+            color: ACCENT,
           }}
         >
           ORDER →
@@ -298,12 +319,59 @@ function TrackCard({ track }: { track: Track }) {
   )
 }
 
+// ─── Width group ──────────────────────────────────────────────────────────────
+function WidthGroup({ width, tracks }: { width: number; tracks: Track[] }) {
+  return (
+    <div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          marginBottom: '1rem',
+        }}
+      >
+        <span
+          style={{
+            fontFamily: 'var(--font-bebas)',
+            fontSize: '1.4rem',
+            letterSpacing: '0.08em',
+            color: ACCENT,
+          }}
+        >
+          {width.toFixed(1)}m WIDTH
+        </span>
+        <span
+          style={{
+            fontFamily: 'var(--font-bebas)',
+            fontSize: '0.8rem',
+            letterSpacing: '0.1em',
+            color: ACCENT,
+            background: 'rgba(0,180,216,0.1)',
+            border: '1px solid rgba(0,180,216,0.25)',
+            padding: '1px 8px',
+          }}
+        >
+          {tracks.length}
+        </span>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {tracks.map((track) => (
+          <TrackCard key={track.id} track={track} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const [tracks, setTracks] = useState<Track[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [sizeFilter, setSizeFilter] = useState<SizeFilter>('all')
+  const [materialFilter, setMaterialFilter] = useState<MaterialFilter>('all')
+  const [showAllGroups, setShowAllGroups] = useState(false)
 
   useEffect(() => {
     fetch('/api/tracks')
@@ -319,7 +387,9 @@ export default function HomePage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const filteredTracks = tracks.filter((t) => matchesFilter(t, sizeFilter))
+  const filteredTracks = tracks.filter((t) => matchesSizeFilter(t, sizeFilter))
+  const groups = groupByWidth(filteredTracks)
+  const visibleGroups = showAllGroups ? groups : groups.slice(0, 2)
 
   return (
     <div style={{ background: '#080808', color: '#fff', minHeight: '100vh', fontFamily: 'var(--font-dm-sans), sans-serif' }}>
@@ -346,7 +416,7 @@ export default function HomePage() {
               flexShrink: 0,
             }}
           >
-            TRACK HALL<span style={{ color: ORANGE }}>.</span>
+            NessRC<span style={{ color: ACCENT }}>.net</span>
           </div>
 
           {/* Nav */}
@@ -370,13 +440,13 @@ export default function HomePage() {
       ═══════════════════════════════════════════════════════════════════════ */}
       <section
         className="relative overflow-hidden"
-        style={{ minHeight: '100svh', display: 'flex', alignItems: 'center' }}
+        style={{ minHeight: '75svh', display: 'flex', alignItems: 'center' }}
       >
         {/* Background layers */}
         <GridBg opacity={0.035} />
         <NoiseSvg />
 
-        {/* Orange glow — bottom left */}
+        {/* Cyan glow — bottom left */}
         <div
           style={{
             position: 'absolute',
@@ -384,7 +454,7 @@ export default function HomePage() {
             left: '-5%',
             width: '50vw',
             height: '50vw',
-            background: `radial-gradient(circle, rgba(255,69,0,0.08) 0%, transparent 70%)`,
+            background: `radial-gradient(circle, rgba(0,180,216,0.08) 0%, transparent 70%)`,
             pointerEvents: 'none',
             zIndex: 1,
           }}
@@ -399,7 +469,7 @@ export default function HomePage() {
             fontFamily: 'var(--font-bebas)',
             fontSize: 'clamp(6rem, 18vw, 16rem)',
             lineHeight: 1,
-            color: 'rgba(255,69,0,0.03)',
+            color: 'rgba(0,180,216,0.03)',
             pointerEvents: 'none',
             userSelect: 'none',
             zIndex: 1,
@@ -410,10 +480,10 @@ export default function HomePage() {
         </div>
 
         <div
-          className="relative w-full max-w-7xl mx-auto px-6 py-28"
+          className="relative w-full max-w-7xl mx-auto px-6 py-20"
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            gridTemplateColumns: '1fr auto',
             gap: '4rem',
             alignItems: 'center',
             zIndex: 2,
@@ -434,7 +504,7 @@ export default function HomePage() {
                 style={{
                   width: 18,
                   height: 1,
-                  background: ORANGE,
+                  background: ACCENT,
                   display: 'inline-block',
                 }}
               />
@@ -455,7 +525,7 @@ export default function HomePage() {
             <h1
               style={{
                 fontFamily: 'var(--font-bebas)',
-                fontSize: 'clamp(5rem, 12vw, 10rem)',
+                fontSize: 'clamp(3.5rem, 9vw, 7rem)',
                 lineHeight: 0.85,
                 letterSpacing: '0.01em',
                 margin: 0,
@@ -464,7 +534,7 @@ export default function HomePage() {
               <span style={{ display: 'block', color: '#fff' }}>CUSTOM</span>
               <span style={{ display: 'block', color: '#fff' }}>RACE</span>
               <span style={{ display: 'block', color: '#fff' }}>TRACK</span>
-              <span style={{ display: 'block', color: ORANGE }}>MATS</span>
+              <span style={{ display: 'block', color: ACCENT }}>MATS</span>
             </h1>
 
             {/* Sub */}
@@ -528,13 +598,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right — Circuit diagram */}
-          <div
-            className="hidden lg:block"
-            style={{ height: '480px', position: 'relative' }}
-          >
-            <CircuitDiagram />
-          </div>
+          {/* Right — Data panel */}
+          <HeroDataPanel />
         </div>
       </section>
 
@@ -546,7 +611,7 @@ export default function HomePage() {
         className="relative py-28 overflow-hidden"
         style={{
           background: '#111',
-          borderTop: `2px solid ${ORANGE}`,
+          borderTop: `2px solid ${ACCENT}`,
         }}
       >
         <GridBg opacity={0.025} />
@@ -556,13 +621,13 @@ export default function HomePage() {
           {/* Section header */}
           <div className="mb-16">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <span style={{ width: 28, height: 2, background: ORANGE, display: 'inline-block' }} />
+              <span style={{ width: 28, height: 2, background: ACCENT, display: 'inline-block' }} />
               <span
                 style={{
                   fontFamily: 'var(--font-dm-sans)',
                   fontSize: '0.7rem',
                   letterSpacing: '0.25em',
-                  color: ORANGE,
+                  color: ACCENT,
                   textTransform: 'uppercase',
                 }}
               >
@@ -620,55 +685,100 @@ export default function HomePage() {
 
           {/* Control bar */}
           <div
-            className="flex flex-wrap items-center justify-between gap-4 mb-10"
+            className="mb-10"
             style={{ paddingBottom: '1.25rem', borderBottom: '1px solid rgba(255,255,255,0.07)' }}
           >
-            {/* Left: title + count */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <h2
-                style={{
-                  fontFamily: 'var(--font-bebas)',
-                  fontSize: 'clamp(2rem, 4vw, 2.8rem)',
-                  letterSpacing: '0.04em',
-                  color: '#fff',
-                  lineHeight: 1,
-                  margin: 0,
-                }}
-              >
-                TRACK CATALOG
-              </h2>
-              {!loading && tracks.length > 0 && (
-                <span
+            {/* Title row */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <h2
                   style={{
                     fontFamily: 'var(--font-bebas)',
-                    fontSize: '0.85rem',
-                    letterSpacing: '0.1em',
-                    color: ORANGE,
-                    background: 'rgba(255,69,0,0.1)',
-                    border: '1px solid rgba(255,69,0,0.3)',
-                    padding: '2px 10px',
+                    fontSize: 'clamp(2rem, 4vw, 2.8rem)',
+                    letterSpacing: '0.04em',
+                    color: '#fff',
+                    lineHeight: 1,
+                    margin: 0,
                   }}
                 >
-                  {filteredTracks.length}/{tracks.length}
-                </span>
-              )}
+                  TRACK CATALOG
+                </h2>
+                {!loading && tracks.length > 0 && (
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-bebas)',
+                      fontSize: '0.85rem',
+                      letterSpacing: '0.1em',
+                      color: ACCENT,
+                      background: 'rgba(0,180,216,0.1)',
+                      border: '1px solid rgba(0,180,216,0.3)',
+                      padding: '2px 10px',
+                    }}
+                  >
+                    {filteredTracks.length}/{tracks.length}
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* Right: filter buttons */}
-            <div style={{ display: 'flex', gap: 6 }}>
-              {([
-                { key: 'all', label: 'ALL' },
-                { key: 'small', label: 'SMALL' },
-                { key: 'medium', label: 'MEDIUM' },
-                { key: 'large', label: 'LARGE' },
-              ] as { key: SizeFilter; label: string }[]).map(({ key, label }) => (
-                <FilterBtn
-                  key={key}
-                  label={label}
-                  active={sizeFilter === key}
-                  onClick={() => setSizeFilter(key)}
-                />
-              ))}
+            {/* Size filter row */}
+            <div className="flex flex-wrap items-center gap-3 mb-3">
+              <span
+                style={{
+                  fontSize: '0.6rem',
+                  letterSpacing: '0.18em',
+                  color: 'rgba(255,255,255,0.3)',
+                  fontFamily: 'var(--font-dm-sans)',
+                  minWidth: 52,
+                }}
+              >
+                SIZE
+              </span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {([
+                  { key: 'all', label: 'ALL' },
+                  { key: 'small', label: 'SMALL' },
+                  { key: 'medium', label: 'MEDIUM' },
+                  { key: 'large', label: 'LARGE' },
+                ] as { key: SizeFilter; label: string }[]).map(({ key, label }) => (
+                  <FilterBtn
+                    key={key}
+                    label={label}
+                    active={sizeFilter === key}
+                    onClick={() => setSizeFilter(key)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Material filter row */}
+            <div className="flex flex-wrap items-center gap-3">
+              <span
+                style={{
+                  fontSize: '0.6rem',
+                  letterSpacing: '0.18em',
+                  color: 'rgba(255,255,255,0.3)',
+                  fontFamily: 'var(--font-dm-sans)',
+                  minWidth: 52,
+                }}
+              >
+                MATERIAL
+              </span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {([
+                  { key: 'all', label: 'ALL' },
+                  { key: 'PVC', label: 'PVC' },
+                  { key: 'CLOTH', label: 'CLOTH' },
+                  { key: 'BRICK-A', label: 'BRICK-A' },
+                ] as { key: MaterialFilter; label: string }[]).map(({ key, label }) => (
+                  <FilterBtn
+                    key={key}
+                    label={label}
+                    active={materialFilter === key}
+                    onClick={() => setMaterialFilter(key)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
@@ -681,7 +791,7 @@ export default function HomePage() {
                 onClick={() => window.location.reload()}
                 style={{
                   fontSize: '0.8rem',
-                  color: ORANGE,
+                  color: ACCENT,
                   textDecoration: 'underline',
                   background: 'none',
                   border: 'none',
@@ -706,10 +816,39 @@ export default function HomePage() {
           )}
 
           {!loading && filteredTracks.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredTracks.map((track) => (
-                <TrackCard key={track.id} track={track} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+              {visibleGroups.map(({ width, items }) => (
+                <WidthGroup key={width} width={width} tracks={items} />
               ))}
+
+              {groups.length > 2 && (
+                <div className="text-center" style={{ paddingTop: '1rem' }}>
+                  <button
+                    onClick={() => setShowAllGroups((v) => !v)}
+                    style={{
+                      fontFamily: 'var(--font-bebas)',
+                      fontSize: '0.85rem',
+                      letterSpacing: '0.16em',
+                      color: ACCENT,
+                      background: 'transparent',
+                      border: `1px solid rgba(0,180,216,0.35)`,
+                      padding: '8px 28px',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s, color 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      const t = e.currentTarget
+                      t.style.background = 'rgba(0,180,216,0.12)'
+                    }}
+                    onMouseLeave={(e) => {
+                      const t = e.currentTarget
+                      t.style.background = 'transparent'
+                    }}
+                  >
+                    {showAllGroups ? 'SHOW LESS' : `SHOW ALL SIZES (${groups.length - 2} MORE)`}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -735,7 +874,7 @@ export default function HomePage() {
                 lineHeight: 1,
               }}
             >
-              TRACK HALL<span style={{ color: ORANGE }}>.</span>
+              NessRC<span style={{ color: ACCENT }}>.net</span>
             </div>
             <p
               style={{
@@ -746,6 +885,16 @@ export default function HomePage() {
               }}
             >
               RC TRACK MATS · CUSTOM PRINTED
+            </p>
+            <p
+              style={{
+                fontSize: '0.65rem',
+                color: 'rgba(255,255,255,0.18)',
+                marginTop: 4,
+                letterSpacing: '0.1em',
+              }}
+            >
+              © 2025 NessRC.net
             </p>
           </div>
           <FooterLinks />
@@ -792,17 +941,17 @@ function HeaderOrderBtn() {
         letterSpacing: '0.14em',
         textTransform: 'uppercase' as const,
         padding: '7px 18px',
-        border: `1.5px solid ${ORANGE}`,
-        color: ORANGE,
+        border: `1.5px solid ${ACCENT}`,
+        color: ACCENT,
         transition: 'background 0.2s, color 0.2s',
         textDecoration: 'none',
         flexShrink: 0,
       }}
       onMouseEnter={() => {
-        if (ref.current) { ref.current.style.background = ORANGE; ref.current.style.color = '#000' }
+        if (ref.current) { ref.current.style.background = ACCENT; ref.current.style.color = '#000' }
       }}
       onMouseLeave={() => {
-        if (ref.current) { ref.current.style.background = 'transparent'; ref.current.style.color = ORANGE }
+        if (ref.current) { ref.current.style.background = 'transparent'; ref.current.style.color = ACCENT }
       }}
     >
       TRACK MY ORDER
@@ -822,14 +971,14 @@ function HeroCtaPrimary() {
         letterSpacing: '0.14em',
         textTransform: 'uppercase' as const,
         padding: '13px 32px',
-        background: ORANGE,
+        background: ACCENT,
         color: '#000',
         fontWeight: 700,
         transition: 'box-shadow 0.25s, transform 0.2s',
         textDecoration: 'none',
       }}
       onMouseEnter={() => {
-        if (ref.current) { ref.current.style.boxShadow = '0 0 32px rgba(255,69,0,0.5)'; ref.current.style.transform = 'translateY(-2px)' }
+        if (ref.current) { ref.current.style.boxShadow = '0 0 32px rgba(0,180,216,0.4)'; ref.current.style.transform = 'translateY(-2px)' }
       }}
       onMouseLeave={() => {
         if (ref.current) { ref.current.style.boxShadow = 'none'; ref.current.style.transform = 'none' }
@@ -887,8 +1036,8 @@ function MaterialCard({
       }}
       onMouseEnter={() => {
         if (ref.current) {
-          ref.current.style.borderColor = 'rgba(255,69,0,0.3)'
-          ref.current.style.boxShadow = '0 0 20px rgba(255,69,0,0.08)'
+          ref.current.style.borderColor = 'rgba(0,180,216,0.3)'
+          ref.current.style.boxShadow = '0 0 20px rgba(0,180,216,0.08)'
         }
       }}
       onMouseLeave={() => {
@@ -903,7 +1052,7 @@ function MaterialCard({
         style={{
           fontFamily: 'var(--font-bebas)',
           fontSize: '3rem',
-          color: ORANGE,
+          color: ACCENT,
           lineHeight: 1,
           marginBottom: '0.5rem',
         }}
@@ -978,7 +1127,7 @@ function MaterialCard({
           left: 0,
           right: 0,
           height: '2px',
-          background: `linear-gradient(90deg, ${ORANGE} 0%, transparent 100%)`,
+          background: `linear-gradient(90deg, ${ACCENT} 0%, transparent 100%)`,
           opacity: 0.5,
         }}
       />
@@ -1004,9 +1153,9 @@ function FilterBtn({
         letterSpacing: '0.14em',
         textTransform: 'uppercase' as const,
         padding: '6px 14px',
-        background: active ? ORANGE : 'transparent',
+        background: active ? ACCENT : 'transparent',
         color: active ? '#000' : 'rgba(255,255,255,0.45)',
-        border: active ? `1px solid ${ORANGE}` : '1px solid rgba(255,255,255,0.12)',
+        border: active ? `1px solid ${ACCENT}` : '1px solid rgba(255,255,255,0.12)',
         cursor: 'pointer',
         transition: 'all 0.2s',
         fontWeight: active ? 700 : 400,
@@ -1045,7 +1194,7 @@ function FooterLink({ label, href }: { label: string; href: string }) {
         textDecoration: 'none',
         transition: 'color 0.2s',
       }}
-      onMouseEnter={() => { if (ref.current) ref.current.style.color = ORANGE }}
+      onMouseEnter={() => { if (ref.current) ref.current.style.color = ACCENT }}
       onMouseLeave={() => { if (ref.current) ref.current.style.color = 'rgba(255,255,255,0.3)' }}
     >
       {label}
