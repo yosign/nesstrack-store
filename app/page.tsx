@@ -1,39 +1,11 @@
-import { Suspense } from 'react'
+'use client'
+
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { fetchRemoteTracks } from '@/lib/fetch-tracks'
 import { getTrackDisplayName } from '@/lib/types'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Track } from '@/lib/types'
-
-async function TrackGrid() {
-  const tracks = await fetchRemoteTracks()
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-      {tracks.map((track: Track) => (
-        <Link key={track.id} href={`/order?track=${track.id}`} className="group">
-          <Card className="bg-zinc-900 ring-zinc-800 hover:ring-zinc-500 transition-all cursor-pointer overflow-hidden">
-            <div className="aspect-video relative bg-zinc-800">
-              <Image
-                src={track.thumbnailUrl}
-                alt={getTrackDisplayName(track)}
-                fill
-                className="object-cover transition-transform group-hover:scale-105"
-                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-              />
-            </div>
-            <CardContent className="py-2 px-3">
-              <p className="text-sm font-semibold text-white leading-tight">
-                {getTrackDisplayName(track)}
-              </p>
-              <p className="text-xs text-zinc-500 mt-0.5">点击下单</p>
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
-    </div>
-  )
-}
 
 function TrackGridSkeleton() {
   return (
@@ -52,6 +24,24 @@ function TrackGridSkeleton() {
 }
 
 export default function HomePage() {
+  const [tracks, setTracks] = useState<Track[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetch('/api/tracks')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setTracks(data.data)
+        } else {
+          setError('赛道数据加载失败')
+        }
+      })
+      .catch(() => setError('网络错误，请刷新重试'))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800">
@@ -72,9 +62,52 @@ export default function HomePage() {
           <p className="text-zinc-400 text-sm">定制打印 · 多种材质可选 · 点击赛道即可下单</p>
         </div>
 
-        <Suspense fallback={<TrackGridSkeleton />}>
-          <TrackGrid />
-        </Suspense>
+        {loading && <TrackGridSkeleton />}
+
+        {error && (
+          <div className="text-center py-20 text-zinc-500">
+            <p className="text-lg mb-2">😕 {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-sm text-zinc-400 underline"
+            >
+              点击刷新
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && tracks.length === 0 && (
+          <div className="text-center py-20 text-zinc-500">
+            <p>暂无可购买的赛道</p>
+          </div>
+        )}
+
+        {!loading && tracks.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {tracks.map((track) => (
+              <Link key={track.id} href={`/order?track=${track.id}`} className="group">
+                <Card className="bg-zinc-900 border-zinc-800 hover:border-zinc-500 transition-all cursor-pointer overflow-hidden">
+                  <div className="aspect-video relative bg-zinc-800">
+                    <Image
+                      src={track.thumbnailUrl}
+                      alt={getTrackDisplayName(track)}
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                      unoptimized
+                    />
+                  </div>
+                  <CardContent className="py-2 px-3">
+                    <p className="text-sm font-semibold text-white leading-tight">
+                      {getTrackDisplayName(track)}
+                    </p>
+                    <p className="text-xs text-zinc-500 mt-0.5">点击下单</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
