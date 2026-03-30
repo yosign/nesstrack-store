@@ -94,58 +94,144 @@ function GridBg({ opacity = 0.04 }: { opacity?: number }) {
   )
 }
 
-// ─── Hero drift card ──────────────────────────────────────────────────────────
+// ─── Track spec sizes ─────────────────────────────────────────────────────────
+const TRACK_SPECS = [
+  { w: 0.6, h: 1.2, label: 'MINI CIRCUIT' },
+  { w: 1.0, h: 1.5, label: 'CLUB STANDARD' },
+  { w: 1.5, h: 2.2, label: 'PRO LAYOUT' },
+  { w: 2.0, h: 3.0, label: 'COMPETITION' },
+]
+
+// ─── Hero track diagram card ───────────────────────────────────────────────────
 function HeroDataPanel() {
+  const [idx, setIdx] = useState(0)
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => {
+        setIdx(i => (i + 1) % TRACK_SPECS.length)
+        setVisible(true)
+      }, 400)
+    }, 2800)
+    return () => clearInterval(timer)
+  }, [])
+
+  const spec = TRACK_SPECS[idx]
+  // SVG canvas: 280 x 200, pad 32px each side
+  const PAD = 36
+  const CW = 280, CH = 200
+  const maxW = spec.w, maxH = spec.h
+  const scale = Math.min((CW - PAD * 2) / maxW, (CH - PAD * 2) / maxH)
+  const rw = maxW * scale, rh = maxH * scale
+  const rx = (CW - rw) / 2, ry = (CH - rh) / 2
+  const r = Math.min(rw, rh) * 0.18 // corner radius
+
   return (
     <div
-      className="hidden lg:block relative flex-shrink-0 rounded-2xl overflow-hidden"
+      className="hidden lg:flex flex-col flex-shrink-0"
       style={{
-        width: 320,
-        height: 224,
-        boxShadow: `0 0 0 1.5px rgba(0,180,216,0.5), 0 0 50px rgba(0,180,216,0.25)`,
+        width: 280,
+        background: '#0d0d0d',
+        border: `1.5px solid rgba(0,180,216,0.45)`,
+        boxShadow: `0 0 40px rgba(0,180,216,0.18)`,
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/drift.jpg"
-        alt="RC drift"
-        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-      />
-      {/* bottom label */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: '1rem 1.25rem 0.75rem',
-          background: 'linear-gradient(to top, rgba(8,8,8,0.9) 0%, transparent 100%)',
-        }}
-      >
-        <span
-          style={{
-            fontFamily: 'var(--font-bebas)',
-            fontSize: '0.85rem',
-            letterSpacing: '0.18em',
-            color: ACCENT,
-          }}
-        >
-          RC DRIFT · IN ACTION
+      {/* top-right corner cut */}
+      <div style={{
+        position: 'absolute', top: 0, right: 0, width: 0, height: 0,
+        borderStyle: 'solid', borderWidth: '0 24px 24px 0',
+        borderColor: `transparent rgba(0,180,216,0.7) transparent transparent`,
+        zIndex: 2,
+      }} />
+
+      {/* header bar */}
+      <div style={{
+        padding: '10px 14px 6px',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <span style={{ fontFamily: 'var(--font-bebas)', fontSize: '0.75rem', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.35)' }}>
+          TRACK SPEC VIEWER
+        </span>
+        <div style={{ display: 'flex', gap: 5 }}>
+          {TRACK_SPECS.map((_, i) => (
+            <div key={i} style={{
+              width: i === idx ? 16 : 5, height: 5,
+              background: i === idx ? ACCENT : 'rgba(255,255,255,0.15)',
+              transition: 'width 0.4s, background 0.4s',
+            }} />
+          ))}
+        </div>
+      </div>
+
+      {/* SVG diagram */}
+      <div style={{
+        flex: 1,
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.35s ease',
+      }}>
+        <svg width={CW} height={CH} viewBox={`0 0 ${CW} ${CH}`}>
+          {/* grid */}
+          <defs>
+            <pattern id="hgrid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width={CW} height={CH} fill="url(#hgrid)" />
+
+          {/* track outline */}
+          <rect x={rx} y={ry} width={rw} height={rh} rx={r} ry={r}
+            fill="rgba(0,180,216,0.07)" stroke={ACCENT} strokeWidth="1.5"
+            strokeDasharray="0"
+          />
+          {/* inner track lane */}
+          <rect x={rx + 12} y={ry + 12} width={rw - 24} height={rh - 24} rx={r * 0.6} ry={r * 0.6}
+            fill="none" stroke="rgba(0,180,216,0.25)" strokeWidth="0.8" strokeDasharray="4 3"
+          />
+
+          {/* width dimension line */}
+          <line x1={rx} y1={ry - 14} x2={rx + rw} y2={ry - 14} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
+          <line x1={rx} y1={ry - 19} x2={rx} y2={ry - 9} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
+          <line x1={rx + rw} y1={ry - 19} x2={rx + rw} y2={ry - 9} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
+          <text x={rx + rw / 2} y={ry - 18} textAnchor="middle"
+            fill={ACCENT} fontSize="9" fontFamily="monospace" letterSpacing="0.5">
+            {spec.w.toFixed(1)} m
+          </text>
+
+          {/* height dimension line */}
+          <line x1={rx + rw + 14} y1={ry} x2={rx + rw + 14} y2={ry + rh} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
+          <line x1={rx + rw + 9} y1={ry} x2={rx + rw + 19} y2={ry} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
+          <line x1={rx + rw + 9} y1={ry + rh} x2={rx + rw + 19} y2={ry + rh} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
+          <text x={rx + rw + 22} y={ry + rh / 2 + 4} textAnchor="start"
+            fill={ACCENT} fontSize="9" fontFamily="monospace" letterSpacing="0.5">
+            {spec.h.toFixed(1)} m
+          </text>
+
+          {/* corner dot */}
+          <circle cx={rx + rw / 2} cy={ry + rh / 2} r="3" fill="rgba(0,180,216,0.3)" stroke={ACCENT} strokeWidth="1"/>
+        </svg>
+      </div>
+
+      {/* footer label */}
+      <div style={{
+        padding: '6px 14px 10px',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.35s ease',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <span style={{ fontFamily: 'var(--font-bebas)', fontSize: '1rem', letterSpacing: '0.12em', color: '#fff' }}>
+          {spec.label}
+        </span>
+        <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: ACCENT, letterSpacing: '0.08em' }}>
+          {spec.w.toFixed(1)} × {spec.h.toFixed(1)} m
         </span>
       </div>
-      {/* top-right corner cut */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: 0,
-          height: 0,
-          borderStyle: 'solid',
-          borderWidth: '0 28px 28px 0',
-          borderColor: `transparent rgba(0,180,216,0.7) transparent transparent`,
-        }}
-      />
+
     </div>
   )
 }
