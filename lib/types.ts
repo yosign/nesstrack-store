@@ -20,9 +20,9 @@ export const DEALERS: Record<DealerType, string> = {
 export type OrderStatus = 'pending' | 'in_production' | 'shipped'
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  pending: '待生产',
-  in_production: '生产中',
-  shipped: '已发货'
+  pending: 'PENDING',
+  in_production: 'IN PRODUCTION',
+  shipped: 'SHIPPED',
 }
 
 export const ORDER_STATUS_DESCRIPTIONS: Record<OrderStatus, string> = {
@@ -33,17 +33,17 @@ export const ORDER_STATUS_DESCRIPTIONS: Record<OrderStatus, string> = {
 
 export const MATERIALS: Record<MaterialType, { label: string; factoryLabel: string }> = {
   pvc: {
-    label: 'PVC塑料',
-    factoryLabel: 'PET'
+    label: 'PVC',
+    factoryLabel: 'PET',
   },
   cloth: {
-    label: '比赛布',
-    factoryLabel: '油画布'
+    label: 'RACE CLOTH',
+    factoryLabel: '油画布',
   },
   brick_a: {
-    label: 'A砖',
-    factoryLabel: '5MM PVC'
-  }
+    label: 'BRICK-A',
+    factoryLabel: '5MM PVC',
+  },
 }
 
 // 赛道信息类型

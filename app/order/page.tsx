@@ -1,12 +1,54 @@
 'use client'
 
-import { use, useState } from 'react'
-import Image from 'next/image'
+import { use, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { tracks } from '@/lib/tracks'
 import { MATERIALS, MaterialType, getTrackDisplayName } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
+
+const MATERIAL_DESCRIPTIONS: Record<MaterialType, string> = {
+  pvc: 'Smooth Surface',
+  cloth: 'Woven Texture',
+  brick_a: 'Granular',
+}
+
+function TrackThumb({ src, alt }: { src: string; alt: string }) {
+  const imgRef = useRef<HTMLImageElement>(null)
+  const [portrait, setPortrait] = useState(false)
+
+  const handleLoad = () => {
+    const img = imgRef.current
+    if (!img) return
+    setPortrait(img.naturalHeight > img.naturalWidth)
+  }
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        aspectRatio: '16/9',
+        background: '#0d0d0d',
+      }}
+    >
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        onLoad={handleLoad}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          transform: portrait ? 'rotate(-90deg) scale(1.78)' : 'none',
+        }}
+      />
+    </div>
+  )
+}
 
 export default function OrderPage({
   searchParams,
@@ -33,14 +75,40 @@ export default function OrderPage({
 
   if (selectedTracks.length === 0) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <p className="text-zinc-400">请先选择赛道</p>
+      <div
+        style={{
+          minHeight: '100vh',
+          background: '#080808',
+          color: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <p
+            style={{
+              color: 'rgba(255,255,255,0.4)',
+              marginBottom: 24,
+              fontFamily: 'var(--font-dm-sans)',
+            }}
+          >
+            No tracks selected.
+          </p>
           <Link
             href="/"
-            className="inline-block bg-white text-zinc-950 font-medium px-6 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors text-sm"
+            style={{
+              display: 'inline-block',
+              background: '#00B4D8',
+              color: '#000',
+              padding: '12px 28px',
+              fontFamily: 'var(--font-bebas)',
+              letterSpacing: '0.12em',
+              fontSize: '1rem',
+              textDecoration: 'none',
+            }}
           >
-            返回首页
+            BACK TO HOME
           </Link>
         </div>
       </div>
@@ -50,7 +118,7 @@ export default function OrderPage({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!address.trim()) {
-      setError('请填写收件信息')
+      setError('Please enter shipping information.')
       return
     }
 
@@ -87,109 +155,226 @@ export default function OrderPage({
       router.push(`/order/success?token=${dealerToken}`)
     } catch (err) {
       console.error(err)
-      setError('提交失败，请重试')
+      setError('Submission failed. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const sectionLabel: React.CSSProperties = {
+    fontFamily: 'var(--font-bebas)',
+    fontSize: '0.75rem',
+    letterSpacing: '0.2em',
+    color: 'rgba(255,255,255,0.35)',
+    marginBottom: 12,
+  }
+
+  const textareaBase: React.CSSProperties = {
+    width: '100%',
+    background: '#111',
+    border: '1px solid rgba(255,255,255,0.1)',
+    color: '#fff',
+    padding: '12px 16px',
+    fontSize: '0.875rem',
+    resize: 'none',
+    outline: 'none',
+    fontFamily: 'var(--font-dm-sans)',
+    boxSizing: 'border-box',
+  }
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800">
-        <div className="max-w-lg mx-auto px-4 h-14 flex items-center gap-4">
-          <Link href="/" className="text-zinc-400 hover:text-white text-sm">
-            ← 返回
+    <div style={{ minHeight: '100vh', background: '#080808', color: '#fff' }}>
+      {/* Header */}
+      <header
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          background: 'rgba(8,8,8,0.95)',
+          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-6">
+          <Link href="/">
+            <img src="/images/Logo.png" alt="NessRC" style={{ height: 32, width: 'auto' }} />
           </Link>
-          <h1 className="text-base font-bold">确认订单</h1>
+          <span
+            style={{
+              fontFamily: 'var(--font-bebas)',
+              fontSize: '1.1rem',
+              letterSpacing: '0.1em',
+              color: 'rgba(255,255,255,0.45)',
+            }}
+          >
+            / PLACE ORDER
+          </span>
+          <div style={{ flex: 1 }} />
+          <Link
+            href="/"
+            style={{
+              fontSize: '0.75rem',
+              letterSpacing: '0.12em',
+              color: 'rgba(255,255,255,0.4)',
+              fontFamily: 'var(--font-dm-sans)',
+              textDecoration: 'none',
+            }}
+          >
+            ← BACK
+          </Link>
         </div>
       </header>
 
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-        {/* Selected tracks */}
-        <section>
-          <h2 className="text-xs text-zinc-500 uppercase tracking-wider mb-3">已选赛道</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {selectedTracks.map((track) => (
-              <div key={track.id} className="bg-zinc-900 rounded-xl overflow-hidden">
-                <div className="aspect-[4/3] relative bg-zinc-800">
-                  <Image
-                    src={track.thumbnailUrl}
-                    alt={getTrackDisplayName(track)}
-                    fill
-                    className="object-cover"
-                    sizes="200px"
-                  />
-                </div>
-                <div className="px-3 py-2">
-                  <p className="text-sm font-semibold">{getTrackDisplayName(track)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Material selection */}
-          <section>
-            <h2 className="text-xs text-zinc-500 uppercase tracking-wider mb-3">选择材质</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {(
-                Object.entries(MATERIALS) as [
-                  MaterialType,
-                  { label: string; factoryLabel: string },
-                ][]
-              ).map(([key, mat]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setMaterial(key)}
-                  className={`py-3 px-2 rounded-xl border text-sm font-medium transition-all ${
-                    material === key
-                      ? 'border-white bg-white text-zinc-950'
-                      : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500'
-                  }`}
-                >
-                  {mat.label}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          {/* Address */}
-          <section>
-            <h2 className="text-xs text-zinc-500 uppercase tracking-wider mb-3">收件信息</h2>
-            <textarea
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="姓名 手机号 详细地址（如：张三 13800138000 广东省深圳市南山区XXX路XXX号）"
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400 resize-none"
-              rows={3}
-              required
-            />
-          </section>
-
-          {/* Notes */}
-          <section>
-            <h2 className="text-xs text-zinc-500 uppercase tracking-wider mb-3">备注（可选）</h2>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="其他要求..."
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400 resize-none"
-              rows={2}
-            />
-          </section>
-
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-white text-zinc-950 font-semibold py-4 rounded-xl hover:bg-zinc-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        <div className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-10">
+          {/* Left: Form */}
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: 'flex', flexDirection: 'column', gap: 32 }}
           >
-            {isSubmitting ? '提交中...' : '确认下单'}
-          </button>
-        </form>
+            {/* Material */}
+            <section>
+              <div style={sectionLabel}>MATERIAL</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {(
+                  Object.entries(MATERIALS) as [
+                    MaterialType,
+                    { label: string; factoryLabel: string },
+                  ][]
+                ).map(([key, mat]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setMaterial(key)}
+                    style={{
+                      padding: '14px 8px',
+                      background: material === key ? 'rgba(0,180,216,0.15)' : '#111',
+                      border: `1px solid ${material === key ? '#00B4D8' : 'rgba(255,255,255,0.1)'}`,
+                      color: material === key ? '#fff' : 'rgba(255,255,255,0.5)',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-bebas)',
+                        fontSize: '1.1rem',
+                        letterSpacing: '0.1em',
+                        marginBottom: 4,
+                      }}
+                    >
+                      {mat.label}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.68rem',
+                        color: material === key ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)',
+                        letterSpacing: '0.04em',
+                        fontFamily: 'var(--font-dm-sans)',
+                      }}
+                    >
+                      {MATERIAL_DESCRIPTIONS[key]}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* Shipping info */}
+            <section>
+              <div style={sectionLabel}>SHIPPING INFO</div>
+              <textarea
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Name · Phone · Full Address"
+                rows={3}
+                required
+                style={textareaBase}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#00B4D8')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
+              />
+            </section>
+
+            {/* Notes */}
+            <section>
+              <div style={sectionLabel}>NOTES (OPTIONAL)</div>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Additional requirements..."
+                rows={2}
+                style={textareaBase}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#00B4D8')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
+              />
+            </section>
+
+            {error && (
+              <div
+                style={{
+                  borderLeft: '2px solid rgba(255,80,80,0.9)',
+                  paddingLeft: 12,
+                  color: 'rgba(255,80,80,0.9)',
+                  fontSize: '0.875rem',
+                  fontFamily: 'var(--font-dm-sans)',
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                width: '100%',
+                height: 52,
+                background: '#00B4D8',
+                color: '#000',
+                fontFamily: 'var(--font-bebas)',
+                fontSize: '1.1rem',
+                letterSpacing: '0.12em',
+                border: 'none',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.4 : 1,
+              }}
+            >
+              {isSubmitting ? 'SUBMITTING...' : 'PLACE ORDER →'}
+            </button>
+          </form>
+
+          {/* Right: Summary */}
+          <div className="mt-10 lg:mt-0">
+            <div
+              style={{
+                background: '#111',
+                border: '1px solid rgba(255,255,255,0.08)',
+                padding: '1.5rem',
+              }}
+            >
+              <div style={sectionLabel}>ORDER SUMMARY</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {selectedTracks.map((track) => (
+                  <div key={track.id}>
+                    <TrackThumb src={track.thumbnailUrl} alt={getTrackDisplayName(track)} />
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-bebas)',
+                        fontSize: '1.1rem',
+                        letterSpacing: '0.08em',
+                        marginTop: 8,
+                        color: '#fff',
+                      }}
+                    >
+                      {getTrackDisplayName(track)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

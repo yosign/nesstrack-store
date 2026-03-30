@@ -1,16 +1,10 @@
 'use client'
 
-import { use, useState, useEffect } from 'react'
-import Image from 'next/image'
+import { use, useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { tracks } from '@/lib/tracks'
-import {
-  MATERIALS,
-  MaterialType,
-  getTrackDisplayName,
-  ORDER_STATUS_LABELS,
-} from '@/lib/types'
+import { MATERIALS, MaterialType, getTrackDisplayName, ORDER_STATUS_LABELS } from '@/lib/types'
 
 type OrderStatus = 'pending' | 'in_production' | 'shipped'
 
@@ -31,6 +25,61 @@ interface Order {
 }
 
 const STEPS: OrderStatus[] = ['pending', 'in_production', 'shipped']
+
+const STATUS_BADGE: Record<OrderStatus, { label: string; color: string; bg: string }> = {
+  pending: {
+    label: 'PENDING',
+    color: 'rgba(255,255,255,0.5)',
+    bg: 'rgba(255,255,255,0.07)',
+  },
+  in_production: {
+    label: 'IN PRODUCTION',
+    color: '#00B4D8',
+    bg: 'rgba(0,180,216,0.12)',
+  },
+  shipped: {
+    label: 'SHIPPED',
+    color: '#4ade80',
+    bg: 'rgba(74,222,128,0.1)',
+  },
+}
+
+function TrackThumb({ src, alt }: { src: string; alt: string }) {
+  const imgRef = useRef<HTMLImageElement>(null)
+  const [portrait, setPortrait] = useState(false)
+
+  const handleLoad = () => {
+    const img = imgRef.current
+    if (!img) return
+    setPortrait(img.naturalHeight > img.naturalWidth)
+  }
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        aspectRatio: '16/9',
+        background: '#0d0d0d',
+      }}
+    >
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        onLoad={handleLoad}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          transform: portrait ? 'rotate(-90deg) scale(1.78)' : 'none',
+        }}
+      />
+    </div>
+  )
+}
 
 export default function TrackPage({
   searchParams,
@@ -61,7 +110,7 @@ export default function TrackPage({
       .then(({ data, error: dbError }) => {
         if (cancelled) return
         if (dbError || !data) {
-          setError('未找到该订单')
+          setError('Order not found.')
         } else {
           setOrder(data as Order)
         }
@@ -93,60 +142,135 @@ export default function TrackPage({
       if (dbError) throw dbError
 
       if (!data || data.length === 0) {
-        setError('未找到相关订单')
+        setError('No orders found.')
       } else {
         setOrders(data as Order[])
       }
     } catch {
-      setError('查询失败，请重试')
+      setError('Search failed. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800">
-        <div className="max-w-lg mx-auto px-4 h-14 flex items-center gap-4">
-          <Link href="/" className="text-zinc-400 hover:text-white text-sm">
-            ← 首页
+    <div style={{ minHeight: '100vh', background: '#080808', color: '#fff' }}>
+      {/* Header */}
+      <header
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          background: 'rgba(8,8,8,0.95)',
+          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-6">
+          <Link href="/">
+            <img src="/images/Logo.png" alt="NessRC" style={{ height: 32, width: 'auto' }} />
           </Link>
-          <h1 className="text-base font-bold">查询订单</h1>
+          <span
+            style={{
+              fontFamily: 'var(--font-bebas)',
+              fontSize: '1.1rem',
+              letterSpacing: '0.1em',
+              color: 'rgba(255,255,255,0.45)',
+            }}
+          >
+            / TRACK ORDER
+          </span>
+          <div style={{ flex: 1 }} />
+          <Link
+            href="/"
+            style={{
+              fontSize: '0.75rem',
+              letterSpacing: '0.12em',
+              color: 'rgba(255,255,255,0.4)',
+              fontFamily: 'var(--font-dm-sans)',
+              textDecoration: 'none',
+            }}
+          >
+            ← BACK
+          </Link>
         </div>
       </header>
 
-      <div className="max-w-lg mx-auto px-4 py-6">
+      {/* Content */}
+      <div className="max-w-2xl mx-auto px-6 py-10">
         {/* Search form */}
-        <form onSubmit={handleSearch} className="mb-6">
-          <div className="flex gap-2">
+        <form onSubmit={handleSearch} style={{ marginBottom: 32 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="输入手机号或地址关键词查询"
-              className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-400"
+              placeholder="Phone number or address keyword"
+              style={{
+                flex: 1,
+                background: '#111',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#fff',
+                padding: '12px 16px',
+                fontSize: '0.875rem',
+                outline: 'none',
+                fontFamily: 'var(--font-dm-sans)',
+              }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = '#00B4D8')}
+              onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
             />
             <button
               type="submit"
-              className="bg-white text-zinc-950 font-medium px-4 py-3 rounded-xl hover:bg-zinc-100 transition-colors text-sm whitespace-nowrap"
+              style={{
+                background: '#00B4D8',
+                color: '#000',
+                padding: '12px 20px',
+                fontFamily: 'var(--font-bebas)',
+                fontSize: '1rem',
+                letterSpacing: '0.12em',
+                border: 'none',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
             >
-              搜索
+              SEARCH →
             </button>
           </div>
         </form>
 
         {loading && (
-          <div className="text-center py-16 text-zinc-500">查询中...</div>
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '64px 0',
+              color: 'rgba(255,255,255,0.3)',
+              fontFamily: 'var(--font-bebas)',
+              letterSpacing: '0.15em',
+              fontSize: '0.9rem',
+            }}
+          >
+            SEARCHING...
+          </div>
         )}
 
         {!loading && error && (
-          <div className="text-center py-16 text-zinc-500">{error}</div>
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '64px 0',
+              color: 'rgba(255,255,255,0.4)',
+              fontFamily: 'var(--font-dm-sans)',
+              fontSize: '0.875rem',
+            }}
+          >
+            {error}
+          </div>
         )}
 
         {!loading && order && <OrderCard order={order} />}
 
         {!loading && orders.length > 0 && (
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {orders.map((o) => (
               <OrderCard key={o.id} order={o} />
             ))}
@@ -154,8 +278,16 @@ export default function TrackPage({
         )}
 
         {!loading && !error && !order && orders.length === 0 && !tokenParam && (
-          <div className="text-center py-16 text-zinc-600 text-sm">
-            输入手机号或地址关键词查询您的订单
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '64px 0',
+              color: 'rgba(255,255,255,0.2)',
+              fontFamily: 'var(--font-dm-sans)',
+              fontSize: '0.875rem',
+            }}
+          >
+            Enter a phone number or address keyword to find your order.
           </div>
         )}
       </div>
@@ -172,80 +304,197 @@ function OrderCard({ order }: { order: Order }) {
 
   const currentStep = STEPS.indexOf(order.status)
   const material = MATERIALS[order.material]
+  const badge = STATUS_BADGE[order.status] ?? STATUS_BADGE.pending
 
   return (
-    <div className="bg-zinc-900 rounded-2xl p-4 space-y-4">
-      {/* Order number and address */}
-      <div>
-        <p className="font-mono text-sm font-semibold text-white">{order.order_number}</p>
-        <p className="text-xs text-zinc-400 mt-0.5 line-clamp-2">{order.address}</p>
+    <div
+      style={{
+        background: '#111',
+        border: '1px solid rgba(255,255,255,0.08)',
+        padding: '1.5rem',
+        marginBottom: 0,
+      }}
+    >
+      {/* Header row: order number + badge */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 20,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: 'monospace',
+            fontSize: '1rem',
+            fontWeight: 600,
+            color: '#fff',
+            letterSpacing: '0.04em',
+          }}
+        >
+          {order.order_number}
+        </span>
+        <span
+          style={{
+            fontFamily: 'var(--font-bebas)',
+            fontSize: '0.75rem',
+            letterSpacing: '0.15em',
+            color: badge.color,
+            background: badge.bg,
+            padding: '3px 10px',
+          }}
+        >
+          {badge.label}
+        </span>
       </div>
 
       {/* Progress timeline */}
-      <div className="flex items-start">
-        {STEPS.map((step, i) => (
-          <div key={step} className="flex items-start flex-1">
-            <div className="flex flex-col items-center flex-1">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                  i <= currentStep
-                    ? 'bg-white text-zinc-950'
-                    : 'bg-zinc-800 border border-zinc-700 text-zinc-500'
-                }`}
-              >
-                {i + 1}
+      <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 24 }}>
+        {STEPS.map((step, i) => {
+          const done = i <= currentStep
+          return (
+            <div key={step} style={{ display: 'flex', alignItems: 'flex-start', flex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                {/* Square step indicator */}
+                <div
+                  style={{
+                    width: 20,
+                    height: 20,
+                    background: done ? '#00B4D8' : '#222',
+                    border: done ? 'none' : '1px solid rgba(255,255,255,0.15)',
+                    flexShrink: 0,
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: 'var(--font-bebas)',
+                    fontSize: '0.62rem',
+                    letterSpacing: '0.1em',
+                    color: done ? '#00B4D8' : 'rgba(255,255,255,0.25)',
+                    marginTop: 6,
+                    textAlign: 'center',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {ORDER_STATUS_LABELS[step]}
+                </span>
               </div>
-              <span
-                className={`text-xs mt-1 text-center leading-tight ${
-                  i <= currentStep ? 'text-white' : 'text-zinc-600'
-                }`}
-              >
-                {ORDER_STATUS_LABELS[step]}
-              </span>
+              {i < STEPS.length - 1 && (
+                <div
+                  style={{
+                    height: 1,
+                    flex: 1,
+                    marginTop: 10,
+                    background: i < currentStep ? '#00B4D8' : 'rgba(255,255,255,0.08)',
+                  }}
+                />
+              )}
             </div>
-            {i < STEPS.length - 1 && (
-              <div
-                className={`h-0.5 flex-none w-10 mt-4 mx-1 ${
-                  i < currentStep ? 'bg-white' : 'bg-zinc-700'
-                }`}
-              />
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Track thumbnails */}
       {trackList.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div
+          style={{
+            display: 'flex',
+            gap: 10,
+            overflowX: 'auto',
+            paddingBottom: 4,
+            marginBottom: 20,
+          }}
+        >
           {trackList.map((t) => (
-            <div key={t.id} className="flex-none w-24">
-              <div className="aspect-[4/3] relative bg-zinc-800 rounded-lg overflow-hidden">
-                <Image
-                  src={t.thumbnailUrl}
-                  alt={getTrackDisplayName(t)}
-                  fill
-                  className="object-cover"
-                  sizes="96px"
-                />
-              </div>
-              <p className="text-xs text-zinc-400 mt-1 text-center">{getTrackDisplayName(t)}</p>
+            <div key={t.id} style={{ flexShrink: 0, width: 100 }}>
+              <TrackThumb src={t.thumbnailUrl} alt={getTrackDisplayName(t)} />
+              <p
+                style={{
+                  fontFamily: 'var(--font-bebas)',
+                  fontSize: '0.85rem',
+                  letterSpacing: '0.06em',
+                  color: 'rgba(255,255,255,0.6)',
+                  marginTop: 4,
+                  textAlign: 'center',
+                }}
+              >
+                {getTrackDisplayName(t)}
+              </p>
             </div>
           ))}
         </div>
       )}
 
       {/* Details */}
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <p className="text-zinc-500 text-xs mb-0.5">材质</p>
-          <p className="text-white">{material?.label ?? order.material}</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div
+          style={{
+            fontSize: '0.8rem',
+            color: 'rgba(255,255,255,0.5)',
+            fontFamily: 'var(--font-dm-sans)',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'var(--font-bebas)',
+              letterSpacing: '0.1em',
+              color: 'rgba(255,255,255,0.3)',
+              marginRight: 8,
+              fontSize: '0.7rem',
+            }}
+          >
+            MATERIAL:
+          </span>
+          {material?.label ?? order.material}
         </div>
+
         {order.tracking_number && (
-          <div>
-            <p className="text-zinc-500 text-xs mb-0.5">快递单号</p>
-            <p className="text-white font-mono text-xs">{order.tracking_number}</p>
+          <div
+            style={{
+              fontSize: '0.8rem',
+              color: 'rgba(255,255,255,0.5)',
+              fontFamily: 'var(--font-dm-sans)',
+            }}
+          >
+            <span
+              style={{
+                fontFamily: 'var(--font-bebas)',
+                letterSpacing: '0.1em',
+                color: 'rgba(255,255,255,0.3)',
+                marginRight: 8,
+                fontSize: '0.7rem',
+              }}
+            >
+              TRACKING:
+            </span>
+            <span style={{ fontFamily: 'monospace' }}>{order.tracking_number}</span>
           </div>
         )}
+
+        <div
+          style={{
+            fontSize: '0.8rem',
+            color: 'rgba(255,255,255,0.35)',
+            fontFamily: 'var(--font-dm-sans)',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'var(--font-bebas)',
+              letterSpacing: '0.1em',
+              color: 'rgba(255,255,255,0.3)',
+              marginRight: 8,
+              fontSize: '0.7rem',
+            }}
+          >
+            ADDRESS:
+          </span>
+          {order.address}
+        </div>
       </div>
     </div>
   )
