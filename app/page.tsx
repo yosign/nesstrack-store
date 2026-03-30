@@ -119,9 +119,9 @@ function HeroDataPanel() {
   }, [])
 
   const spec = TRACK_SPECS[idx]
-  // SVG canvas: 280 x 200, pad 32px each side
-  const PAD = 36
-  const CW = 280, CH = 200
+  // SVG canvas: 560 x 400, pad 48px each side
+  const PAD = 52
+  const CW = 560, CH = 400
   const maxW = spec.w, maxH = spec.h
   const scale = Math.min((CW - PAD * 2) / maxW, (CH - PAD * 2) / maxH)
   const rw = maxW * scale, rh = maxH * scale
@@ -132,10 +132,10 @@ function HeroDataPanel() {
     <div
       className="hidden lg:flex flex-col flex-shrink-0"
       style={{
-        width: 280,
+        width: 560,
         background: '#0d0d0d',
         border: `1.5px solid rgba(0,180,216,0.45)`,
-        boxShadow: `0 0 40px rgba(0,180,216,0.18)`,
+        boxShadow: `0 0 60px rgba(0,180,216,0.2)`,
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -197,17 +197,17 @@ function HeroDataPanel() {
           <line x1={rx} y1={ry - 14} x2={rx + rw} y2={ry - 14} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
           <line x1={rx} y1={ry - 19} x2={rx} y2={ry - 9} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
           <line x1={rx + rw} y1={ry - 19} x2={rx + rw} y2={ry - 9} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
-          <text x={rx + rw / 2} y={ry - 18} textAnchor="middle"
-            fill={ACCENT} fontSize="9" fontFamily="monospace" letterSpacing="0.5">
+          <text x={rx + rw / 2} y={ry - 22} textAnchor="middle"
+            fill={ACCENT} fontSize="12" fontFamily="monospace" letterSpacing="0.5">
             {spec.w.toFixed(1)} m
           </text>
 
           {/* height dimension line */}
-          <line x1={rx + rw + 14} y1={ry} x2={rx + rw + 14} y2={ry + rh} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
-          <line x1={rx + rw + 9} y1={ry} x2={rx + rw + 19} y2={ry} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
-          <line x1={rx + rw + 9} y1={ry + rh} x2={rx + rw + 19} y2={ry + rh} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
-          <text x={rx + rw + 22} y={ry + rh / 2 + 4} textAnchor="start"
-            fill={ACCENT} fontSize="9" fontFamily="monospace" letterSpacing="0.5">
+          <line x1={rx + rw + 18} y1={ry} x2={rx + rw + 18} y2={ry + rh} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
+          <line x1={rx + rw + 12} y1={ry} x2={rx + rw + 24} y2={ry} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
+          <line x1={rx + rw + 12} y1={ry + rh} x2={rx + rw + 24} y2={ry + rh} stroke={ACCENT} strokeWidth="0.8" opacity="0.7"/>
+          <text x={rx + rw + 28} y={ry + rh / 2 + 5} textAnchor="start"
+            fill={ACCENT} fontSize="12" fontFamily="monospace" letterSpacing="0.5">
             {spec.h.toFixed(1)} m
           </text>
 
