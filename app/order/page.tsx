@@ -84,7 +84,7 @@ export default function OrderPage({
 
       if (dbError) throw dbError
 
-      router.push(`/order/success?token=${dealerToken}&order=${encodeURIComponent(orderNumber)}`)
+      router.push(`/order/success?token=${dealerToken}`)
     } catch (err) {
       console.error(err)
       setError('提交失败，请重试')

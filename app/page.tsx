@@ -1,8 +1,55 @@
+import { Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { tracks } from '@/lib/tracks'
+import { fetchRemoteTracks } from '@/lib/fetch-tracks'
 import { getTrackDisplayName } from '@/lib/types'
 import { Card, CardContent } from '@/components/ui/card'
+import type { Track } from '@/lib/types'
+
+async function TrackGrid() {
+  const tracks = await fetchRemoteTracks()
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+      {tracks.map((track: Track) => (
+        <Link key={track.id} href={`/order?track=${track.id}`} className="group">
+          <Card className="bg-zinc-900 ring-zinc-800 hover:ring-zinc-500 transition-all cursor-pointer overflow-hidden">
+            <div className="aspect-video relative bg-zinc-800">
+              <Image
+                src={track.thumbnailUrl}
+                alt={getTrackDisplayName(track)}
+                fill
+                className="object-cover transition-transform group-hover:scale-105"
+                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+              />
+            </div>
+            <CardContent className="py-2 px-3">
+              <p className="text-sm font-semibold text-white leading-tight">
+                {getTrackDisplayName(track)}
+              </p>
+              <p className="text-xs text-zinc-500 mt-0.5">点击下单</p>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
+    </div>
+  )
+}
+
+function TrackGridSkeleton() {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+      {Array.from({ length: 15 }).map((_, i) => (
+        <div key={i} className="bg-zinc-900 rounded-xl overflow-hidden animate-pulse">
+          <div className="aspect-video bg-zinc-800" />
+          <div className="py-2 px-3">
+            <div className="h-4 bg-zinc-700 rounded w-3/4 mb-1" />
+            <div className="h-3 bg-zinc-800 rounded w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function HomePage() {
   return (
@@ -25,29 +72,9 @@ export default function HomePage() {
           <p className="text-zinc-400 text-sm">定制打印 · 多种材质可选 · 点击赛道即可下单</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {tracks.map((track) => (
-            <Link key={track.id} href={`/order?track=${track.id}`} className="group">
-              <Card className="bg-zinc-900 ring-zinc-800 hover:ring-zinc-500 transition-all cursor-pointer overflow-hidden">
-                <div className="aspect-[4/3] relative bg-zinc-800">
-                  <Image
-                    src={track.thumbnailUrl}
-                    alt={getTrackDisplayName(track)}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                  />
-                </div>
-                <CardContent className="py-2 px-3">
-                  <p className="text-sm font-semibold text-white leading-tight">
-                    {getTrackDisplayName(track)}
-                  </p>
-                  <p className="text-xs text-zinc-500 mt-0.5">点击下单</p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <Suspense fallback={<TrackGridSkeleton />}>
+          <TrackGrid />
+        </Suspense>
       </div>
     </div>
   )
