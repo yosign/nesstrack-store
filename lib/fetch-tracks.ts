@@ -4,68 +4,24 @@ let cachedTracks: Track[] | null = null
 let cacheTime = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
+export function clearTracksCache() {
+  cachedTracks = null
+  cacheTime = 0
+}
+
 export async function fetchRemoteTracks(): Promise<Track[]> {
   const now = Date.now()
   if (cachedTracks && now - cacheTime < CACHE_DURATION) {
     return cachedTracks
   }
 
-  const res = await fetch('https://work.nesslabs.cn/tracks.ts', { cache: 'no-store' })
+  const url = process.env.TRACKS_DATA_URL
+  if (!url) throw new Error('TRACKS_DATA_URL is not configured')
+
+  const res = await fetch(url, { cache: 'no-store' })
   if (!res.ok) throw new Error(`Failed to fetch tracks: ${res.status}`)
-  // Strip import lines so Function() can evaluate the array
-  const raw = await res.text()
-  const text = raw.split('\n').filter(line => !line.trim().startsWith('import ')).join('\n')
 
-  // Find the = sign after "export const tracks", then find the [ that follows
-  const exportIdx = text.search(/export\s+const\s+tracks/)
-  if (exportIdx === -1) throw new Error('Could not find tracks export')
-
-  const equalIdx = text.indexOf('=', exportIdx)
-  if (equalIdx === -1) throw new Error('Could not find = after tracks')
-
-  const startIdx = text.indexOf('[', equalIdx)
-  let depth = 0
-  let endIdx = -1
-  for (let i = startIdx; i < text.length; i++) {
-    if (text[i] === '[') depth++
-    else if (text[i] === ']') {
-      depth--
-      if (depth === 0) {
-        endIdx = i
-        break
-      }
-    }
-  }
-  if (endIdx === -1) throw new Error('Could not parse tracks array')
-
-  // Re-parse with string-aware bracket matching
-  let bracketCount = 0
-  let realEndIdx = startIdx
-  let inString = false
-  let stringChar = ''
-  let escaped = false
-
-  for (let i = startIdx; i < text.length; i++) {
-    const char = text[i]
-    if (escaped) { escaped = false; continue }
-    if (char === '\\') { escaped = true; continue }
-    if (char === '"' || char === "'" || char === '`') {
-      if (!inString) { inString = true; stringChar = char }
-      else if (char === stringChar) { inString = false; stringChar = '' }
-      continue
-    }
-    if (!inString) {
-      if (char === '[') bracketCount++
-      else if (char === ']') {
-        bracketCount--
-        if (bracketCount === 0) { realEndIdx = i; break }
-      }
-    }
-  }
-
-  const arrayStr = text.slice(startIdx, realEndIdx + 1)
-  // eslint-disable-next-line no-new-func
-  const tracks = new Function(`return ${arrayStr}`)() as Track[]
+  const tracks = await res.json() as Track[]
 
   cachedTracks = tracks
   cacheTime = now
