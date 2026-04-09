@@ -500,7 +500,7 @@ export default function HomePage() {
       ═══════════════════════════════════════════════════════════════════════ */}
       <section
         className="relative overflow-hidden"
-        style={{ minHeight: '55svh', display: 'flex', alignItems: 'center' }}
+        style={{ minHeight: '28svh', display: 'flex', alignItems: 'center' }}
       >
         {/* Background layers */}
         <GridBg opacity={0.035} />
@@ -540,7 +540,7 @@ export default function HomePage() {
         </div>
 
         <div
-          className="relative w-full max-w-7xl mx-auto px-6 py-20"
+          className="relative w-full max-w-7xl mx-auto px-6 py-10"
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr auto',
