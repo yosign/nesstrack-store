@@ -14,8 +14,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "赛道堂 - RC 赛道垫定制",
-  description: "RC 赛车赛道垫定制购买，多种尺寸和材质可选",
+  title: "NessRC - Custom RC Track Mats",
+  description: "Professional custom-printed track mats for RC drift & racing. PVC, Race Cloth, Brick-A materials.",
 };
 
 export default function RootLayout({
