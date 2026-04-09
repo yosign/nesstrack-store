@@ -591,10 +591,8 @@ export default function HomePage() {
                 margin: 0,
               }}
             >
-              <span style={{ display: 'block', color: '#fff' }}>CUSTOM</span>
-              <span style={{ display: 'block', color: '#fff' }}>RACE</span>
-              <span style={{ display: 'block', color: '#fff' }}>TRACK</span>
-              <span style={{ display: 'block', color: ACCENT }}>MATS</span>
+              <span style={{ display: 'block', color: '#fff' }}>DRIFT</span>
+              <span style={{ display: 'block', color: ACCENT }}>TRACK MATS</span>
             </h1>
 
             {/* Sub */}
