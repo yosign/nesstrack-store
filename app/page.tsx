@@ -423,7 +423,7 @@ export default function HomePage() {
   const [error, setError] = useState('')
   const [sizeFilter, setSizeFilter] = useState<SizeFilter>('all')
   const [materialFilter, setMaterialFilter] = useState<MaterialFilter>('all')
-  const [showAllGroups, setShowAllGroups] = useState(false)
+  const [showAllGroups, setShowAllGroups] = useState(true)
 
   useEffect(() => {
     fetch('/api/tracks')
@@ -653,80 +653,6 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          MATERIALS
-      ═══════════════════════════════════════════════════════════════════════ */}
-      <section
-        id="materials"
-        className="relative py-28 overflow-hidden"
-        style={{
-          background: '#111',
-          borderTop: `2px solid ${ACCENT}`,
-        }}
-      >
-        <GridBg opacity={0.025} />
-        <NoiseSvg />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
-          {/* Section header */}
-          <div className="mb-16">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <span style={{ width: 28, height: 2, background: ACCENT, display: 'inline-block' }} />
-              <span
-                style={{
-                  fontFamily: 'var(--font-dm-sans)',
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.25em',
-                  color: ACCENT,
-                  textTransform: 'uppercase',
-                }}
-              >
-                SPECIFICATIONS
-              </span>
-            </div>
-            <h2
-              style={{
-                fontFamily: 'var(--font-bebas)',
-                fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-                letterSpacing: '0.04em',
-                color: '#fff',
-                lineHeight: 1,
-              }}
-            >
-              MATERIAL SPECS
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {[
-              {
-                num: '01',
-                name: 'PVC',
-                specs: '0.3mm · Smooth Surface · 380g/m²',
-                badges: ['Lightweight', 'Portable', 'Indoor'],
-                desc: 'Elastic PVC sheet, smooth surface. Lightweight and easy to roll up for storage.',
-              },
-              {
-                num: '02',
-                name: 'RACE CLOTH',
-                specs: '0.8mm · Woven Texture · 620g/m²',
-                badges: ['Professional', 'High Fidelity', 'Race-Grade'],
-                desc: 'Fine-woven canvas with exceptional color accuracy. Professional circuit standard.',
-              },
-              {
-                num: '03',
-                name: 'BRICK-A',
-                specs: '5mm · Granular Surface · 1800g/m²',
-                badges: ['Anti-slip', 'Thick', 'Realistic'],
-                desc: '5mm PVC foam with granular top. Heavy, stable, with authentic track feel underfoot.',
-              },
-            ].map((mat) => (
-              <MaterialCard key={mat.num} mat={mat} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════════
           TRACK CATALOG
       ═══════════════════════════════════════════════════════════════════════ */}
       <section id="tracks" className="py-24" style={{ background: '#080808' }}>
@@ -900,6 +826,80 @@ export default function HomePage() {
               )}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MATERIALS
+      ═══════════════════════════════════════════════════════════════════════ */}
+      <section
+        id="materials"
+        className="relative py-28 overflow-hidden"
+        style={{
+          background: '#111',
+          borderTop: `2px solid ${ACCENT}`,
+        }}
+      >
+        <GridBg opacity={0.025} />
+        <NoiseSvg />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          {/* Section header */}
+          <div className="mb-16">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <span style={{ width: 28, height: 2, background: ACCENT, display: 'inline-block' }} />
+              <span
+                style={{
+                  fontFamily: 'var(--font-dm-sans)',
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.25em',
+                  color: ACCENT,
+                  textTransform: 'uppercase',
+                }}
+              >
+                SPECIFICATIONS
+              </span>
+            </div>
+            <h2
+              style={{
+                fontFamily: 'var(--font-bebas)',
+                fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                letterSpacing: '0.04em',
+                color: '#fff',
+                lineHeight: 1,
+              }}
+            >
+              MATERIAL SPECS
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {[
+              {
+                num: '01',
+                name: 'PVC',
+                specs: '0.3mm · Smooth Surface · 380g/m²',
+                badges: ['Lightweight', 'Portable', 'Indoor'],
+                desc: 'Elastic PVC sheet, smooth surface. Lightweight and easy to roll up for storage.',
+              },
+              {
+                num: '02',
+                name: 'RACE CLOTH',
+                specs: '0.8mm · Woven Texture · 620g/m²',
+                badges: ['Professional', 'High Fidelity', 'Race-Grade'],
+                desc: 'Fine-woven canvas with exceptional color accuracy. Professional circuit standard.',
+              },
+              {
+                num: '03',
+                name: 'BRICK-A',
+                specs: '5mm · Granular Surface · 1800g/m²',
+                badges: ['Anti-slip', 'Thick', 'Realistic'],
+                desc: '5mm PVC foam with granular top. Heavy, stable, with authentic track feel underfoot.',
+              },
+            ].map((mat) => (
+              <MaterialCard key={mat.num} mat={mat} />
+            ))}
+          </div>
         </div>
       </section>
 
