@@ -1214,9 +1214,10 @@ function FilterBtn({
 }
 
 function FooterLinks() {
+  const t = translations[useLocale()]
   return (
     <div style={{ display: 'flex', gap: '2rem' }}>
-          {[
+      {[
         { label: t.nav.tracks, href: '#tracks' },
         { label: t.nav.materials, href: '#materials' },
         { label: t.nav.orderStatus, href: '/track' },
