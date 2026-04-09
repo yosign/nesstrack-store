@@ -42,8 +42,14 @@ function groupByWidth(tracks: Track[]): { width: number; items: Track[] }[] {
     if (!map.has(w)) map.set(w, [])
     map.get(w)!.push(track)
   }
+  const PRIORITY_WIDTH = 1.5
   return [...map.entries()]
-    .sort((a, b) => a[0] - b[0])
+    .sort((a, b) => {
+      const aIsPriority = a[0] === PRIORITY_WIDTH
+      const bIsPriority = b[0] === PRIORITY_WIDTH
+      if (aIsPriority !== bIsPriority) return aIsPriority ? -1 : 1
+      return a[0] - b[0]
+    })
     .map(([width, items]) => ({ width, items }))
 }
 
