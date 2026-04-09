@@ -46,12 +46,12 @@ export const MATERIALS: Record<MaterialType, { label: string; factoryLabel: stri
   },
 }
 
-// 赛道信息类型
+// 赛道信息类型（originalUrl 仅服务端使用，不对外暴露）
 export interface Track {
   id: string
   name: string
   thumbnailUrl: string
-  originalUrl: string
+  originalUrl?: string
 }
 
 // 赛道材质映射类型
