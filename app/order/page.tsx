@@ -225,7 +225,7 @@ export default function OrderPage({
       </header>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-10">
           {/* Left: Form */}
           <form
