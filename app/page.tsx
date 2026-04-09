@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { getTrackDisplayName } from '@/lib/types'
 import type { Track } from '@/lib/types'
+import { translations } from '@/lib/i18n'
+import { useLocale } from '@/lib/use-locale'
 
 const ACCENT = '#00B4D8'
 
@@ -107,14 +109,14 @@ function GridBg({ opacity = 0.04 }: { opacity?: number }) {
 
 // ─── Track spec sizes ─────────────────────────────────────────────────────────
 const TRACK_SPECS = [
-  { w: 0.6, h: 1.2, label: 'MINI CIRCUIT' },
-  { w: 1.0, h: 1.5, label: 'CLUB STANDARD' },
-  { w: 1.5, h: 2.2, label: 'PRO LAYOUT' },
-  { w: 2.0, h: 3.0, label: 'COMPETITION' },
+  { w: 0.6, h: 1.2 },
+  { w: 1.0, h: 1.5 },
+  { w: 1.5, h: 2.2 },
+  { w: 2.0, h: 3.0 },
 ]
 
 // ─── Hero track diagram card ───────────────────────────────────────────────────
-function HeroDataPanel() {
+function HeroDataPanel({ specLabels, title }: { specLabels: string[]; title: string }) {
   const [idx, setIdx] = useState(0)
   const [visible, setVisible] = useState(true)
 
@@ -166,7 +168,7 @@ function HeroDataPanel() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{ fontFamily: 'var(--font-bebas)', fontSize: '0.75rem', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.35)' }}>
-          TRACK SPEC VIEWER
+          {title}
         </span>
         <div style={{ display: 'flex', gap: 5 }}>
           {TRACK_SPECS.map((_, i) => (
@@ -236,7 +238,7 @@ function HeroDataPanel() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{ fontFamily: 'var(--font-bebas)', fontSize: '1rem', letterSpacing: '0.12em', color: '#fff' }}>
-          {spec.label}
+          {specLabels[idx]}
         </span>
         <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: ACCENT, letterSpacing: '0.08em' }}>
           {spec.w.toFixed(1)} × {spec.h.toFixed(1)} m
@@ -269,7 +271,7 @@ function TrackGridSkeleton() {
 }
 
 // ─── Track card ───────────────────────────────────────────────────────────────
-function TrackCard({ track }: { track: Track }) {
+function TrackCard({ track, orderLabel }: { track: Track; orderLabel: string }) {
   const cardRef = useRef<HTMLAnchorElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
   const displayName = getTrackDisplayName(track)
@@ -375,7 +377,7 @@ function TrackCard({ track }: { track: Track }) {
             color: ACCENT,
           }}
         >
-          ORDER →
+          {orderLabel}
         </span>
       </div>
     </Link>
@@ -383,7 +385,7 @@ function TrackCard({ track }: { track: Track }) {
 }
 
 // ─── Width group ──────────────────────────────────────────────────────────────
-function WidthGroup({ width, tracks }: { width: number; tracks: Track[] }) {
+function WidthGroup({ width, tracks, widthLabel, orderLabel }: { width: number; tracks: Track[]; widthLabel: (w: number) => string; orderLabel: string }) {
   return (
     <div>
       <div
@@ -402,7 +404,7 @@ function WidthGroup({ width, tracks }: { width: number; tracks: Track[] }) {
             color: ACCENT,
           }}
         >
-          {width.toFixed(1)}m WIDTH
+          {widthLabel(width)}
         </span>
         <span
           style={{
@@ -420,7 +422,7 @@ function WidthGroup({ width, tracks }: { width: number; tracks: Track[] }) {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {tracks.map((track) => (
-          <TrackCard key={track.id} track={track} />
+          <TrackCard key={track.id} track={track} orderLabel={orderLabel} />
         ))}
       </div>
     </div>
@@ -429,6 +431,9 @@ function WidthGroup({ width, tracks }: { width: number; tracks: Track[] }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function HomePage() {
+  const locale = useLocale()
+  const t = translations[locale]
+
   const [tracks, setTracks] = useState<Track[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -482,16 +487,16 @@ export default function HomePage() {
           {/* Nav */}
           <nav className="hidden md:flex items-center gap-8">
             {[
-              { label: 'TRACKS', href: '#tracks' },
-              { label: 'MATERIALS', href: '#materials' },
-              { label: 'ORDER STATUS', href: '/track' },
+              { label: t.nav.tracks, href: '#tracks' },
+              { label: t.nav.materials, href: '#materials' },
+              { label: t.nav.orderStatus, href: '/track' },
             ].map(({ label, href }) => (
               <NavLink key={label} href={href} label={label} />
             ))}
           </nav>
 
           {/* CTA */}
-          <HeaderOrderBtn />
+          <HeaderOrderBtn label={t.nav.trackMyOrder} />
         </div>
       </header>
 
@@ -577,7 +582,7 @@ export default function HomePage() {
                   textTransform: 'uppercase',
                 }}
               >
-                RC TRACK MATS · EST. 2025
+                {t.hero.tag}
               </span>
             </div>
 
@@ -591,8 +596,8 @@ export default function HomePage() {
                 margin: 0,
               }}
             >
-              <span style={{ display: 'block', color: '#fff' }}>DRIFT</span>
-              <span style={{ display: 'block', color: ACCENT }}>TRACK MATS</span>
+              <span style={{ display: 'block', color: '#fff' }}>{t.hero.line1}</span>
+              <span style={{ display: 'block', color: ACCENT }}>{t.hero.line2}</span>
             </h1>
 
             {/* Sub */}
@@ -605,14 +610,13 @@ export default function HomePage() {
                 maxWidth: '420px',
               }}
             >
-              Professional-grade custom-printed track mats for RC drift &amp; racing.
-              PVC · Race Cloth · Brick-A materials.
+              {t.hero.subtitle}
             </p>
 
             {/* Buttons */}
             <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <HeroCtaPrimary />
-              <HeroCtaSecondary />
+              <HeroCtaPrimary label={t.hero.shopTracks} />
+              <HeroCtaSecondary label={t.hero.learnMore} />
             </div>
 
             {/* Spec strip */}
@@ -626,9 +630,9 @@ export default function HomePage() {
               }}
             >
               {[
-                { label: 'MATERIALS', value: '3' },
-                { label: 'MAX SIZE', value: '3m' },
-                { label: 'LEAD TIME', value: '7–14d' },
+                { label: t.hero.stats.materialsLabel, value: '3' },
+                { label: t.hero.stats.maxSizeLabel, value: '3m' },
+                { label: t.hero.stats.leadTimeLabel, value: '7–14d' },
               ].map(({ label, value }) => (
                 <div key={label}>
                   <div
@@ -657,7 +661,7 @@ export default function HomePage() {
           </div>
 
           {/* Right — Data panel */}
-          <HeroDataPanel />
+          <HeroDataPanel specLabels={t.specViewer.specLabels} title={t.specViewer.title} />
         </div>
       </section>
 
@@ -685,7 +689,7 @@ export default function HomePage() {
                     margin: 0,
                   }}
                 >
-                  TRACK CATALOG
+                  {t.catalog.title}
                 </h2>
                 {!loading && tracks.length > 0 && (
                   <span
@@ -716,7 +720,7 @@ export default function HomePage() {
                   minWidth: 52,
                 }}
               >
-                SIZE
+                {t.catalog.sizeLabel}
               </span>
               <div style={{ display: 'flex', gap: 6 }}>
                 {([
@@ -724,14 +728,17 @@ export default function HomePage() {
                   { key: 'small', label: 'SMALL' },
                   { key: 'medium', label: 'MEDIUM' },
                   { key: 'large', label: 'LARGE' },
-                ] as { key: SizeFilter; label: string }[]).map(({ key, label }) => (
-                  <FilterBtn
-                    key={key}
-                    label={label}
-                    active={sizeFilter === key}
-                    onClick={() => setSizeFilter(key)}
-                  />
-                ))}
+                ] as { key: SizeFilter; label: string }[]).map(({ key, label: _label }) => {
+                  const label = key === 'all' ? t.catalog.all : key === 'small' ? t.catalog.small : key === 'medium' ? t.catalog.medium : t.catalog.large
+                  return (
+                    <FilterBtn
+                      key={key}
+                      label={label}
+                      active={sizeFilter === key}
+                      onClick={() => setSizeFilter(key)}
+                    />
+                  )
+                })}
               </div>
             </div>
 
@@ -746,7 +753,7 @@ export default function HomePage() {
                   minWidth: 52,
                 }}
               >
-                MATERIAL
+                {t.catalog.materialLabel}
               </span>
               <div style={{ display: 'flex', gap: 6 }}>
                 {([
@@ -754,14 +761,17 @@ export default function HomePage() {
                   { key: 'PVC', label: 'PVC' },
                   { key: 'CLOTH', label: 'CLOTH' },
                   { key: 'BRICK-A', label: 'BRICK-A' },
-                ] as { key: MaterialFilter; label: string }[]).map(({ key, label }) => (
-                  <FilterBtn
-                    key={key}
-                    label={label}
-                    active={materialFilter === key}
-                    onClick={() => setMaterialFilter(key)}
-                  />
-                ))}
+                ] as { key: MaterialFilter; label: string }[]).map(({ key, label: _label }) => {
+                  const label = key === 'all' ? t.catalog.all : key === 'CLOTH' ? t.catalog.cloth : key
+                  return (
+                    <FilterBtn
+                      key={key}
+                      label={label}
+                      active={materialFilter === key}
+                      onClick={() => setMaterialFilter(key)}
+                    />
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -782,27 +792,27 @@ export default function HomePage() {
                   cursor: 'pointer',
                 }}
               >
-                RETRY
+                {t.catalog.retry}
               </button>
             </div>
           )}
 
           {!loading && !error && tracks.length === 0 && (
             <div className="text-center py-24" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-bebas)', letterSpacing: '0.1em' }}>
-              NO TRACKS AVAILABLE
+              {t.catalog.noTracks}
             </div>
           )}
 
           {!loading && !error && tracks.length > 0 && filteredTracks.length === 0 && (
             <div className="text-center py-24" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-bebas)', letterSpacing: '0.1em' }}>
-              NO TRACKS MATCH THIS FILTER
+              {t.catalog.noMatch}
             </div>
           )}
 
           {!loading && filteredTracks.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
               {visibleGroups.map(({ width, items }) => (
-                <WidthGroup key={width} width={width} tracks={items} />
+                <WidthGroup key={width} width={width} tracks={items} widthLabel={t.catalog.widthGroup} orderLabel={t.catalog.order} />
               ))}
 
               {groups.length > 2 && (
@@ -829,7 +839,7 @@ export default function HomePage() {
                       t.style.background = 'transparent'
                     }}
                   >
-                    {showAllGroups ? 'SHOW LESS' : `SHOW ALL SIZES (${groups.length - 2} MORE)`}
+                    {showAllGroups ? t.catalog.showLess : t.catalog.showAll(groups.length - 2)}
                   </button>
                 </div>
               )}
@@ -866,7 +876,7 @@ export default function HomePage() {
                   textTransform: 'uppercase',
                 }}
               >
-                SPECIFICATIONS
+                {t.materials.sectionTag}
               </span>
             </div>
             <h2
@@ -878,34 +888,12 @@ export default function HomePage() {
                 lineHeight: 1,
               }}
             >
-              MATERIAL SPECS
+              {t.materials.title}
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {[
-              {
-                num: '01',
-                name: 'PVC',
-                specs: '0.3mm · Smooth Surface · 380g/m²',
-                badges: ['Lightweight', 'Portable', 'Indoor'],
-                desc: 'Elastic PVC sheet, smooth surface. Lightweight and easy to roll up for storage.',
-              },
-              {
-                num: '02',
-                name: 'RACE CLOTH',
-                specs: '0.8mm · Woven Texture · 620g/m²',
-                badges: ['Professional', 'High Fidelity', 'Race-Grade'],
-                desc: 'Fine-woven canvas with exceptional color accuracy. Professional circuit standard.',
-              },
-              {
-                num: '03',
-                name: 'BRICK-A',
-                specs: '5mm · Granular Surface · 1800g/m²',
-                badges: ['Anti-slip', 'Thick', 'Realistic'],
-                desc: '5mm PVC foam with granular top. Heavy, stable, with authentic track feel underfoot.',
-              },
-            ].map((mat) => (
+            {t.materials.items.map((mat) => (
               <MaterialCard key={mat.num} mat={mat} />
             ))}
           </div>
@@ -943,7 +931,7 @@ export default function HomePage() {
                 letterSpacing: '0.12em',
               }}
             >
-              RC TRACK MATS · CUSTOM PRINTED
+              {t.footer.tagline}
             </p>
             <p
               style={{
@@ -988,7 +976,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
   )
 }
 
-function HeaderOrderBtn() {
+function HeaderOrderBtn({ label }: { label: string }) {
   const ref = useRef<HTMLAnchorElement>(null)
   return (
     <Link
@@ -1013,12 +1001,12 @@ function HeaderOrderBtn() {
         if (ref.current) { ref.current.style.background = 'transparent'; ref.current.style.color = ACCENT }
       }}
     >
-      TRACK MY ORDER
+      {label}
     </Link>
   )
 }
 
-function HeroCtaPrimary() {
+function HeroCtaPrimary({ label }: { label: string }) {
   const ref = useRef<HTMLAnchorElement>(null)
   return (
     <Link
@@ -1043,12 +1031,12 @@ function HeroCtaPrimary() {
         if (ref.current) { ref.current.style.boxShadow = 'none'; ref.current.style.transform = 'none' }
       }}
     >
-      SHOP TRACKS
+      {label}
     </Link>
   )
 }
 
-function HeroCtaSecondary() {
+function HeroCtaSecondary({ label }: { label: string }) {
   const ref = useRef<HTMLAnchorElement>(null)
   return (
     <Link
@@ -1072,7 +1060,7 @@ function HeroCtaSecondary() {
         if (ref.current) { ref.current.style.borderColor = 'rgba(255,255,255,0.25)'; ref.current.style.color = 'rgba(255,255,255,0.8)' }
       }}
     >
-      LEARN MORE
+      {label}
     </Link>
   )
 }
@@ -1228,10 +1216,10 @@ function FilterBtn({
 function FooterLinks() {
   return (
     <div style={{ display: 'flex', gap: '2rem' }}>
-      {[
-        { label: 'TRACKS', href: '#tracks' },
-        { label: 'MATERIALS', href: '#materials' },
-        { label: 'ORDER STATUS', href: '/track' },
+          {[
+        { label: t.nav.tracks, href: '#tracks' },
+        { label: t.nav.materials, href: '#materials' },
+        { label: t.nav.orderStatus, href: '/track' },
       ].map(({ label, href }) => (
         <FooterLink key={label} label={label} href={href} />
       ))}

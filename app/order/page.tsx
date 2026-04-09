@@ -6,12 +6,8 @@ import { useRouter } from 'next/navigation'
 import { tracks } from '@/lib/tracks'
 import { MATERIALS, MaterialType, getTrackDisplayName } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
-
-const MATERIAL_DESCRIPTIONS: Record<MaterialType, string> = {
-  pvc: 'Smooth Surface',
-  cloth: 'Woven Texture',
-  brick_a: 'Granular',
-}
+import { translations } from '@/lib/i18n'
+import { useLocale } from '@/lib/use-locale'
 
 function TrackThumb({ src, alt }: { src: string; alt: string }) {
   const imgRef = useRef<HTMLImageElement>(null)
@@ -66,6 +62,9 @@ export default function OrderPage({
     .map((id) => tracks.find((t) => t.id === id))
     .filter(Boolean) as (typeof tracks)[number][]
 
+  const locale = useLocale()
+  const t = translations[locale]
+
   const router = useRouter()
   const [material, setMaterial] = useState<MaterialType>('pvc')
   const [address, setAddress] = useState('')
@@ -93,7 +92,7 @@ export default function OrderPage({
               fontFamily: 'var(--font-dm-sans)',
             }}
           >
-            No tracks selected.
+            {t.order.noTrack}
           </p>
           <Link
             href="/"
@@ -108,7 +107,7 @@ export default function OrderPage({
               textDecoration: 'none',
             }}
           >
-            BACK TO HOME
+            {t.order.backHome}
           </Link>
         </div>
       </div>
@@ -118,7 +117,7 @@ export default function OrderPage({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!address.trim()) {
-      setError('Please enter shipping information.')
+      setError(t.order.errorShipping)
       return
     }
 
@@ -155,7 +154,7 @@ export default function OrderPage({
       router.push(`/order/success?token=${dealerToken}`)
     } catch (err) {
       console.error(err)
-      setError('Submission failed. Please try again.')
+      setError(t.order.errorSubmit)
     } finally {
       setIsSubmitting(false)
     }
@@ -207,7 +206,7 @@ export default function OrderPage({
               color: 'rgba(255,255,255,0.45)',
             }}
           >
-            / PLACE ORDER
+            {t.order.breadcrumb}
           </span>
           <div style={{ flex: 1 }} />
           <Link
@@ -220,7 +219,7 @@ export default function OrderPage({
               textDecoration: 'none',
             }}
           >
-            ← BACK
+            {t.nav.back}
           </Link>
         </div>
       </header>
@@ -235,14 +234,9 @@ export default function OrderPage({
           >
             {/* Material */}
             <section>
-              <div style={sectionLabel}>MATERIAL</div>
+              <div style={sectionLabel}>{t.order.materialSection}</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                {(
-                  Object.entries(MATERIALS) as [
-                    MaterialType,
-                    { label: string; factoryLabel: string },
-                  ][]
-                ).map(([key, mat]) => (
+                {(Object.keys(MATERIALS) as MaterialType[]).map((key) => (
                   <button
                     key={key}
                     type="button"
@@ -264,7 +258,7 @@ export default function OrderPage({
                         marginBottom: 4,
                       }}
                     >
-                      {mat.label}
+                      {t.order.materialLabels[key] ?? MATERIALS[key].label}
                     </div>
                     <div
                       style={{
@@ -274,7 +268,7 @@ export default function OrderPage({
                         fontFamily: 'var(--font-dm-sans)',
                       }}
                     >
-                      {MATERIAL_DESCRIPTIONS[key]}
+                      {t.order.materialDesc[key]}
                     </div>
                   </button>
                 ))}
@@ -283,11 +277,11 @@ export default function OrderPage({
 
             {/* Shipping info */}
             <section>
-              <div style={sectionLabel}>SHIPPING INFO</div>
+              <div style={sectionLabel}>{t.order.shippingSection}</div>
               <textarea
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="Name · Phone · Full Address"
+                placeholder={t.order.shippingPlaceholder}
                 rows={3}
                 required
                 style={textareaBase}
@@ -298,11 +292,11 @@ export default function OrderPage({
 
             {/* Notes */}
             <section>
-              <div style={sectionLabel}>NOTES (OPTIONAL)</div>
+              <div style={sectionLabel}>{t.order.notesSection}</div>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Additional requirements..."
+                placeholder={t.order.notesPlaceholder}
                 rows={2}
                 style={textareaBase}
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#00B4D8')}
@@ -340,7 +334,7 @@ export default function OrderPage({
                 opacity: isSubmitting ? 0.4 : 1,
               }}
             >
-              {isSubmitting ? 'SUBMITTING...' : 'PLACE ORDER →'}
+              {isSubmitting ? t.order.submitting : t.order.placeOrder}
             </button>
           </form>
 
@@ -353,7 +347,7 @@ export default function OrderPage({
                 padding: '1.5rem',
               }}
             >
-              <div style={sectionLabel}>ORDER SUMMARY</div>
+              <div style={sectionLabel}>{t.order.summary}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {selectedTracks.map((track) => (
                   <div key={track.id}>

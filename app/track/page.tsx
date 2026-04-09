@@ -4,7 +4,9 @@ import { use, useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { tracks } from '@/lib/tracks'
-import { MATERIALS, MaterialType, getTrackDisplayName, ORDER_STATUS_LABELS } from '@/lib/types'
+import { MATERIALS, MaterialType, getTrackDisplayName } from '@/lib/types'
+import { translations, type Translations } from '@/lib/i18n'
+import { useLocale } from '@/lib/use-locale'
 
 type OrderStatus = 'pending' | 'in_production' | 'shipped'
 
@@ -26,22 +28,10 @@ interface Order {
 
 const STEPS: OrderStatus[] = ['pending', 'in_production', 'shipped']
 
-const STATUS_BADGE: Record<OrderStatus, { label: string; color: string; bg: string }> = {
-  pending: {
-    label: 'PENDING',
-    color: 'rgba(255,255,255,0.5)',
-    bg: 'rgba(255,255,255,0.07)',
-  },
-  in_production: {
-    label: 'IN PRODUCTION',
-    color: '#00B4D8',
-    bg: 'rgba(0,180,216,0.12)',
-  },
-  shipped: {
-    label: 'SHIPPED',
-    color: '#4ade80',
-    bg: 'rgba(74,222,128,0.1)',
-  },
+const STATUS_BADGE_STYLE: Record<OrderStatus, { color: string; bg: string }> = {
+  pending: { color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.07)' },
+  in_production: { color: '#00B4D8', bg: 'rgba(0,180,216,0.12)' },
+  shipped: { color: '#4ade80', bg: 'rgba(74,222,128,0.1)' },
 }
 
 function TrackThumb({ src, alt }: { src: string; alt: string }) {
@@ -89,6 +79,9 @@ export default function TrackPage({
   const params = use(searchParams)
   const tokenParam = params.token as string | undefined
 
+  const locale = useLocale()
+  const t = translations[locale]
+
   const [searchQuery, setSearchQuery] = useState('')
   const [order, setOrder] = useState<Order | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
@@ -110,7 +103,7 @@ export default function TrackPage({
       .then(({ data, error: dbError }) => {
         if (cancelled) return
         if (dbError || !data) {
-          setError('Order not found.')
+          setError(t.track.notFound)
         } else {
           setOrder(data as Order)
         }
@@ -142,12 +135,12 @@ export default function TrackPage({
       if (dbError) throw dbError
 
       if (!data || data.length === 0) {
-        setError('No orders found.')
+        setError(t.track.noOrders)
       } else {
         setOrders(data as Order[])
       }
     } catch {
-      setError('Search failed. Please try again.')
+      setError(t.track.searchFailed)
     } finally {
       setLoading(false)
     }
@@ -178,7 +171,7 @@ export default function TrackPage({
               color: 'rgba(255,255,255,0.45)',
             }}
           >
-            / TRACK ORDER
+            {t.track.breadcrumb}
           </span>
           <div style={{ flex: 1 }} />
           <Link
@@ -191,7 +184,7 @@ export default function TrackPage({
               textDecoration: 'none',
             }}
           >
-            ← BACK
+            {t.nav.back}
           </Link>
         </div>
       </header>
@@ -205,7 +198,7 @@ export default function TrackPage({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Phone number or address keyword"
+              placeholder={t.track.searchPlaceholder}
               style={{
                 flex: 1,
                 background: '#111',
@@ -233,7 +226,7 @@ export default function TrackPage({
                 whiteSpace: 'nowrap',
               }}
             >
-              SEARCH →
+              {t.track.search}
             </button>
           </div>
         </form>
@@ -249,7 +242,7 @@ export default function TrackPage({
               fontSize: '0.9rem',
             }}
           >
-            SEARCHING...
+            {t.track.searching}
           </div>
         )}
 
@@ -267,12 +260,12 @@ export default function TrackPage({
           </div>
         )}
 
-        {!loading && order && <OrderCard order={order} />}
+        {!loading && order && <OrderCard order={order} t={t} />}
 
         {!loading && orders.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {orders.map((o) => (
-              <OrderCard key={o.id} order={o} />
+              <OrderCard key={o.id} order={o} t={t} />
             ))}
           </div>
         )}
@@ -287,7 +280,7 @@ export default function TrackPage({
               fontSize: '0.875rem',
             }}
           >
-            Enter a phone number or address keyword to find your order.
+            {t.track.prompt}
           </div>
         )}
       </div>
@@ -295,7 +288,7 @@ export default function TrackPage({
   )
 }
 
-function OrderCard({ order }: { order: Order }) {
+function OrderCard({ order, t }: { order: Order; t: Translations }) {
   const trackList = (
     order.track_ids
       ? order.track_ids.map((id) => tracks.find((t) => t.id === id)).filter(Boolean)
@@ -304,7 +297,7 @@ function OrderCard({ order }: { order: Order }) {
 
   const currentStep = STEPS.indexOf(order.status)
   const material = MATERIALS[order.material]
-  const badge = STATUS_BADGE[order.status] ?? STATUS_BADGE.pending
+  const badgeStyle = STATUS_BADGE_STYLE[order.status] ?? STATUS_BADGE_STYLE.pending
 
   return (
     <div
@@ -340,12 +333,12 @@ function OrderCard({ order }: { order: Order }) {
             fontFamily: 'var(--font-bebas)',
             fontSize: '0.75rem',
             letterSpacing: '0.15em',
-            color: badge.color,
-            background: badge.bg,
+            color: badgeStyle.color,
+            background: badgeStyle.bg,
             padding: '3px 10px',
           }}
         >
-          {badge.label}
+          {t.track.statusLabels[order.status]}
         </span>
       </div>
 
@@ -377,7 +370,7 @@ function OrderCard({ order }: { order: Order }) {
                     lineHeight: 1.2,
                   }}
                 >
-                  {ORDER_STATUS_LABELS[step]}
+                  {t.track.statusLabels[step]}
                 </span>
               </div>
               {i < STEPS.length - 1 && (
@@ -444,9 +437,9 @@ function OrderCard({ order }: { order: Order }) {
               fontSize: '0.7rem',
             }}
           >
-            MATERIAL:
+            {t.track.labelMaterial}
           </span>
-          {material?.label ?? order.material}
+          {t.order.materialLabels[order.material] ?? material?.label ?? order.material}
         </div>
 
         {order.tracking_number && (
@@ -466,7 +459,7 @@ function OrderCard({ order }: { order: Order }) {
                 fontSize: '0.7rem',
               }}
             >
-              TRACKING:
+              {t.track.labelTracking}
             </span>
             <span style={{ fontFamily: 'monospace' }}>{order.tracking_number}</span>
           </div>
@@ -491,7 +484,7 @@ function OrderCard({ order }: { order: Order }) {
               fontSize: '0.7rem',
             }}
           >
-            ADDRESS:
+            {t.track.labelAddress}
           </span>
           {order.address}
         </div>
