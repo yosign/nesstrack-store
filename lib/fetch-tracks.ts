@@ -18,7 +18,12 @@ export async function fetchRemoteTracks(): Promise<Track[]> {
   const url = process.env.TRACKS_DATA_URL
   if (!url) throw new Error('TRACKS_DATA_URL is not configured')
 
-  const res = await fetch(url, { cache: 'no-store' })
+  const headers: HeadersInit = {}
+  if (process.env.TRACKS_API_SECRET) {
+    headers['Authorization'] = `Bearer ${process.env.TRACKS_API_SECRET}`
+  }
+
+  const res = await fetch(url, { cache: 'no-store', headers })
   if (!res.ok) throw new Error(`Failed to fetch tracks: ${res.status}`)
 
   const tracks = await res.json() as Track[]
