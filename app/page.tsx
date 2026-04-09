@@ -42,12 +42,17 @@ function groupByWidth(tracks: Track[]): { width: number; items: Track[] }[] {
     if (!map.has(w)) map.set(w, [])
     map.get(w)!.push(track)
   }
-  const PRIORITY_WIDTH = 1.5
+  const WIDTH_ORDER: number[] = [1.5, 1.6, 2.0]
   return [...map.entries()]
     .sort((a, b) => {
-      const aIsPriority = a[0] === PRIORITY_WIDTH
-      const bIsPriority = b[0] === PRIORITY_WIDTH
-      if (aIsPriority !== bIsPriority) return aIsPriority ? -1 : 1
+      const ai = WIDTH_ORDER.indexOf(a[0])
+      const bi = WIDTH_ORDER.indexOf(b[0])
+      // 都在优先列表里，按列表顺序
+      if (ai !== -1 && bi !== -1) return ai - bi
+      // 只有一个在列表里，列表内的排前面
+      if (ai !== -1) return -1
+      if (bi !== -1) return 1
+      // 都不在列表里，按宽度升序
       return a[0] - b[0]
     })
     .map(([width, items]) => ({ width, items }))
