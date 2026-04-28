@@ -97,6 +97,7 @@ export default function OrderPage({
   const router = useRouter()
   const [material, setMaterial] = useState<MaterialType>('pvc')
   const [address, setAddress] = useState('')
+  const [email, setEmail] = useState('')
   const [notes, setNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -159,6 +160,11 @@ export default function OrderPage({
       setError(t.order.errorShipping)
       return
     }
+    const trimmedEmail = email.trim()
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError(t.order.errorEmail)
+      return
+    }
 
     setIsSubmitting(true)
     setError(null)
@@ -196,6 +202,7 @@ export default function OrderPage({
         supplier_token: supplierToken,
         pending_at: new Date().toISOString(),
         notes: notes || null,
+        email: trimmedEmail || null,
       }
       if (isCustom && customDesign) {
         orderRow.custom_track_design = customDesign
@@ -346,6 +353,21 @@ export default function OrderPage({
                 placeholder={t.order.shippingPlaceholder}
                 rows={3}
                 required
+                style={textareaBase}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#00B4D8')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
+              />
+            </section>
+
+            {/* Email */}
+            <section>
+              <div style={sectionLabel}>{t.order.emailSection}</div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t.order.emailPlaceholder}
+                autoComplete="email"
                 style={textareaBase}
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#00B4D8')}
                 onBlur={(e) => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
