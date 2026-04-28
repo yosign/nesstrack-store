@@ -9,6 +9,11 @@ export type TrackPathProps = {
   invalidColor?: string
   curbColor?: string
   centerColor?: string
+  /**
+   * When true (editor), the rendered ribbon does not absorb pointer events,
+   * so clicks fall through to the underlying surface / anchor handles.
+   */
+  interactive?: boolean
 }
 
 export function TrackPath({
@@ -18,6 +23,7 @@ export function TrackPath({
   invalidColor = '#5a1f1f',
   curbColor = 'rgba(255,255,255,0.85)',
   centerColor = 'rgba(255,255,255,0.55)',
+  interactive = false,
 }: TrackPathProps) {
   const ribbon = buildRibbon(design)
   if (!ribbon) return null
@@ -26,8 +32,9 @@ export function TrackPath({
   const centerW = Math.max(0.004, ref * 0.04)
   const dash = `${ref * 0.6} ${ref * 0.45}`
   const fill = isInvalid ? invalidColor : bodyColor
+  const pe = interactive ? 'none' : undefined
   return (
-    <g>
+    <g pointerEvents={pe}>
       <path d={ribbon.bodyD} fill={fill} fillRule="evenodd" stroke="none" />
       {ribbon.outerD && (
         <path

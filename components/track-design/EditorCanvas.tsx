@@ -231,10 +231,11 @@ export function EditorCanvas({
         </text>
       </g>
 
-      <TrackPath design={design} isInvalid={!bounds.ok} />
+      <TrackPath design={design} isInvalid={!bounds.ok} interactive />
 
       {design.anchors.map((a, i) => {
         const isSelected = a.id === selectedAnchorId
+        const hitR = Math.max(handleR + 0.01, halfMax + 0.04)
         return (
           <g
             key={a.id}
@@ -244,6 +245,13 @@ export function EditorCanvas({
             onPointerCancel={handleAnchorUp}
             style={{ cursor: 'grab' }}
           >
+            <circle
+              cx={a.x}
+              cy={a.y}
+              r={hitR}
+              fill="rgba(0,0,0,0)"
+              stroke="none"
+            />
             <circle
               cx={a.x}
               cy={a.y}
@@ -260,7 +268,7 @@ export function EditorCanvas({
             />
             <text
               x={a.x}
-              y={a.y - handleR - 0.03}
+              y={a.y - hitR - 0.02}
               fontSize={0.06}
               textAnchor="middle"
               fill="rgba(255,255,255,0.75)"
