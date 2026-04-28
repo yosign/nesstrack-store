@@ -43,7 +43,9 @@ BLACKLIST = OUT_DIR / "blacklist.txt"
 TS_OUT = ROOT / "lib" / "track-design" / "auto-templates.ts"
 
 DEFAULT_STROKE_W = 0.18
-DOUGLAS_PEUCKER_FRACTION = 0.015
+DOUGLAS_PEUCKER_FRACTION = 0.006
+MIN_TRACK_AREA_FRACTION = 0.04
+SPUR_PRUNE_PIXELS = 25
 
 
 def load_tracks() -> list[dict]:
@@ -79,27 +81,48 @@ def download(url: str, target: Path) -> bool:
         return False
 
 
+def _track_mask(bgr: np.ndarray) -> np.ndarray:
+    """Color-segment the track surface (asphalt + kerbs) from background grass/concrete/etc."""
+    h, w = bgr.shape[:2]
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+    H, S, V = cv2.split(hsv)
+    asphalt = (S < 75) & (V > 25) & (V < 165)
+    blue_kerb = (H > 90) & (H < 130) & (S > 55) & (V > 40)
+    teal_kerb = (H > 75) & (H < 100) & (S > 50) & (V > 60)
+    grass = (H > 30) & (H < 90) & (S > 70)
+    mask = ((asphalt | blue_kerb | teal_kerb) & ~grass).astype(np.uint8) * 255
+    k = max(3, min(h, w) // 90) | 1
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=3)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
+    return mask
+
+
 def trace_centerline(img_path: Path) -> np.ndarray | None:
-    """Returns Nx2 array of skeleton pixel coords (col, row), or None if extraction fails."""
-    img = cv2.imread(str(img_path), cv2.IMREAD_GRAYSCALE)
+    """Returns skeleton image of the centerline, or None if extraction fails."""
+    img = cv2.imread(str(img_path), cv2.IMREAD_COLOR)
     if img is None:
         return None
-    h, w = img.shape
-    blurred = cv2.GaussianBlur(img, (5, 5), 0)
-    _, binary = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    if binary.mean() > 127:
-        binary = 255 - binary
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel, iterations=2)
-    binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=1)
+    h, w = img.shape[:2]
+    pad = max(2, min(h, w) // 50)
+    inner = img[pad:h - pad, pad:w - pad]
+    mask_inner = _track_mask(inner)
 
-    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(mask_inner, connectivity=8)
     if num_labels <= 1:
         return None
-    largest = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
-    mask = (labels == largest).astype(np.uint8) * 255
+    areas = stats[1:, cv2.CC_STAT_AREA]
+    largest_idx = 1 + int(np.argmax(areas))
+    if areas[largest_idx - 1] < MIN_TRACK_AREA_FRACTION * inner.shape[0] * inner.shape[1]:
+        return None
+    track = (labels == largest_idx).astype(np.uint8) * 255
 
-    skel = skeletonize(mask > 0).astype(np.uint8) * 255
+    full = np.zeros((h, w), dtype=np.uint8)
+    full[pad:h - pad, pad:w - pad] = track
+    skel = skeletonize(full > 0).astype(np.uint8) * 255
+    if os.environ.get("TRACE_DEBUG_DUMP"):
+        cv2.imwrite(str(img_path).replace(".jpg", "_mask.png"), full)
+        cv2.imwrite(str(img_path).replace(".jpg", "_skel.png"), skel)
     return skel
 
 
@@ -136,9 +159,9 @@ def skeleton_to_polyline(skel: np.ndarray) -> tuple[list[tuple[int, int]], bool]
                         break
                     length += g[cur][nbrs[0]]["weight"]
                     cur = nbrs[0]
-                    if length > 15:
+                    if length > SPUR_PRUNE_PIXELS:
                         break
-                if length <= 15:
+                if length <= SPUR_PRUNE_PIXELS:
                     g.remove_nodes_from(visited)
                     pruned = True
 
