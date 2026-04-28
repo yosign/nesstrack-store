@@ -51,7 +51,9 @@ describe('validateBounds', () => {
     expect(r.violations.some((v) => v.side === 'right')).toBe(true)
   })
 
-  it('detects arc bulge exceeding bbox', () => {
+  it('safety-clamp keeps a tight-fillet design within bounds', () => {
+    // r=0.05 around each corner forces per-anchor width to be auto-clamped
+    // to ~2r*0.9 = 0.09. Even with strokeW=0.2, the rendered ribbon fits.
     const d = design(
       [
         a(0.3, 0.05, 0.05),
@@ -63,8 +65,7 @@ describe('validateBounds', () => {
       { strokeW: 0.2 },
     )
     const r = validateBounds(d)
-    expect(r.ok).toBe(false)
-    expect(r.violations.some((v) => v.side === 'top')).toBe(true)
+    expect(r.ok).toBe(true)
   })
 })
 

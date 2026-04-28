@@ -1,5 +1,5 @@
 import { Anchor, TrackDesign, Vec2 } from './types'
-import { computeFillet, widthAt } from './geometry'
+import { computeFillet, widthAt, safeMaxWidthAt } from './geometry'
 
 const TAU = Math.PI * 2
 const SAMPLE_DENSITY = 0.025
@@ -86,7 +86,11 @@ function buildTaggedSegments(design: TrackDesign): TaggedSegment[] {
   if (closed && n < 3) return []
 
   const fillets = buildFillets(design)
-  const widths = anchors.map((a) => widthAt(a, design))
+  const widths = anchors.map((a, i) => {
+    const requested = widthAt(a, design)
+    const safe = safeMaxWidthAt(anchors, i, closed)
+    return Math.min(requested, safe)
+  })
   const out: TaggedSegment[] = []
 
   const arcOf = (i: number): TaggedSegment | null => {
@@ -159,10 +163,11 @@ function sampleSegment(seg: TaggedSegment): CenterSample[] {
     const steps = Math.max(2, Math.ceil(length / SAMPLE_DENSITY))
     for (let k = 0; k <= steps; k++) {
       const u = k / steps
+      const e = u * u * (3 - 2 * u)
       out.push({
         p: { x: seg.a.x + dx * u, y: seg.a.y + dy * u },
         t: { x: tx, y: ty },
-        w: seg.w0 + (seg.w1 - seg.w0) * u,
+        w: seg.w0 + (seg.w1 - seg.w0) * e,
       })
     }
     return out
@@ -226,6 +231,24 @@ function offsetEdges(samples: CenterSample[]): { outer: Vec2[]; inner: Vec2[] } 
   return { outer, inner }
 }
 
+/**
+ * Guard against residual sample-rate-aliased folds. For each consecutive pair
+ * of offset points, if the displacement opposes the local centerline tangent
+ * (dot product < 0), collapse the offending point onto its neighbor's location
+ * — this removes micro-loops without affecting in-spec geometry.
+ */
+function unfoldEdge(edge: Vec2[], samples: CenterSample[]): void {
+  if (edge.length < 2) return
+  for (let i = 1; i < edge.length; i++) {
+    const dx = edge[i].x - edge[i - 1].x
+    const dy = edge[i].y - edge[i - 1].y
+    const t = samples[i].t
+    if (dx * t.x + dy * t.y < 0) {
+      edge[i] = { x: edge[i - 1].x, y: edge[i - 1].y }
+    }
+  }
+}
+
 function polylineD(points: Vec2[], closed: boolean): string {
   if (points.length < 2) return ''
   const cmds: string[] = []
@@ -284,6 +307,8 @@ export function buildRibbon(design: TrackDesign): RibbonResult | null {
   const samples = dedupedSamples(segments)
   if (samples.length < 2) return null
   const { outer, inner } = offsetEdges(samples)
+  unfoldEdge(outer, samples)
+  unfoldEdge(inner, samples)
   const closed = design.closed
   const bodyD = closed ? bodyClosedD(outer, inner) : bodyOpenD(outer, inner)
   const outerD = polylineD(outer, closed)

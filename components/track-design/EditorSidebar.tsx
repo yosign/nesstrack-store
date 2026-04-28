@@ -7,7 +7,11 @@ import {
   ANCHOR_W_MIN,
   ANCHOR_W_MAX,
 } from '@/lib/track-design/types'
-import { getMaxFilletRadius, widthAt } from '@/lib/track-design/geometry'
+import {
+  getMaxFilletRadius,
+  safeMaxWidthAt,
+  widthAt,
+} from '@/lib/track-design/geometry'
 import { BoundsResult, maxStrokeForDesign } from '@/lib/track-design/bounds'
 
 const sectionLabel: React.CSSProperties = {
@@ -78,6 +82,11 @@ export function EditorSidebar({
   const selectedW = selected ? widthAt(selected, design) : 0
   const selectedWidthIsAuto = selected ? !!selected.wAuto || typeof selected.w !== 'number' : false
   const selectedRadiusIsAuto = selected ? !!selected.rAuto : false
+  const selectedSafeW = selected
+    ? safeMaxWidthAt(design.anchors, selectedIndex, design.closed)
+    : ANCHOR_W_MAX
+  const widthIsClamped = selected ? selectedW > selectedSafeW + 1e-4 : false
+  const effectiveSelectedW = Math.min(selectedW, selectedSafeW)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
@@ -175,6 +184,32 @@ export function EditorSidebar({
               onKeyUp={onCommit}
               style={{ width: '100%', accentColor: '#00B4D8' }}
             />
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: 4,
+                fontSize: '0.65rem',
+                fontFamily: 'var(--font-dm-sans)',
+                color: 'rgba(255,255,255,0.4)',
+              }}
+            >
+              <span>Max here: {(selectedSafeW * 100).toFixed(1)} cm</span>
+              {widthIsClamped && (
+                <span
+                  style={{
+                    padding: '2px 6px',
+                    background: 'rgba(255,176,0,0.12)',
+                    border: '1px solid rgba(255,176,0,0.45)',
+                    color: '#ffb964',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  clamped to {(effectiveSelectedW * 100).toFixed(1)} cm
+                </span>
+              )}
+            </div>
 
             <div
               style={{

@@ -193,6 +193,103 @@ export function maxAnchorWidth(design: TrackDesign): number {
   return m
 }
 
+const WIDTH_ARC_MARGIN = 0.9
+const WIDTH_TRANSITION_SLOPE = 1.5
+const HALF_PI = Math.PI / 2
+
+function resolvedFilletR(anchors: Anchor[], i: number, closed: boolean): number {
+  const a = anchors[i]
+  const max = getMaxFilletRadius(anchors, i, closed)
+  const cap = isFinite(max) ? max : 0
+  if (a.rAuto) return cap
+  return Math.max(0, Math.min(a.r, cap))
+}
+
+function setbackAt(anchors: Anchor[], i: number, closed: boolean): number {
+  const n = anchors.length
+  if (!closed && (i === 0 || i === n - 1)) return 0
+  if (n < 3) return 0
+  const r = resolvedFilletR(anchors, i, closed)
+  if (r <= 1e-6) return 0
+  const prev = anchors[(i - 1 + n) % n]
+  const here = anchors[i]
+  const next = anchors[(i + 1) % n]
+  const u1 = norm(sub(prev, here))
+  const u2 = norm(sub(next, here))
+  const cosTheta = Math.max(-1, Math.min(1, dot(u1, u2)))
+  const theta = Math.acos(cosTheta)
+  if (theta > Math.PI - COLLINEAR_EPS || theta < 1e-6) return 0
+  return r / Math.tan(theta / 2)
+}
+
+function segmentLen(anchors: Anchor[], i: number, j: number): number {
+  const dx = anchors[j].x - anchors[i].x
+  const dy = anchors[j].y - anchors[i].y
+  return Math.hypot(dx, dy)
+}
+
+export function safeMaxWidthAt(
+  anchors: Anchor[],
+  i: number,
+  closed: boolean,
+): number {
+  const n = anchors.length
+  if (n < 2) return Number.POSITIVE_INFINITY
+  const a = anchors[i]
+  // Arc bound: inner offset radius (r - w/2) must remain positive.
+  let bound = Number.POSITIVE_INFINITY
+  const isInterior = closed || (i !== 0 && i !== n - 1)
+  if (isInterior && n >= 3) {
+    const r = resolvedFilletR(anchors, i, closed)
+    if (r > 1e-6) bound = Math.min(bound, 2 * r * WIDTH_ARC_MARGIN)
+    // Sharp-corner bound (no fillet): inner offsets cross at the bisector.
+    // For a corner with interior angle θ, the inner offset can extend up to
+    // half the shortest neighbor segment * tan(θ/2). Use as bound when r→0.
+    if (r <= 1e-6) {
+      const prev = anchors[(i - 1 + n) % n]
+      const next = anchors[(i + 1) % n]
+      const u1 = norm(sub(prev, a))
+      const u2 = norm(sub(next, a))
+      const cosTheta = Math.max(-1, Math.min(1, dot(u1, u2)))
+      const theta = Math.acos(cosTheta)
+      const half = theta / 2
+      if (half > 1e-3 && half < HALF_PI - 1e-3) {
+        const minSeg = Math.min(
+          segmentLen(anchors, i, (i + 1) % n),
+          segmentLen(anchors, i, (i - 1 + n) % n),
+        )
+        bound = Math.min(bound, minSeg * Math.tan(half) * WIDTH_ARC_MARGIN)
+      }
+    }
+  }
+  // Segment bound: width transition along each adjoining straight needs
+  // enough usable length so the inner offsets of neighboring fillets clear.
+  const neighbors: number[] = []
+  if (closed) {
+    neighbors.push((i + 1) % n, (i - 1 + n) % n)
+  } else {
+    if (i < n - 1) neighbors.push(i + 1)
+    if (i > 0) neighbors.push(i - 1)
+  }
+  for (const j of neighbors) {
+    const segLen = segmentLen(anchors, i, j)
+    const usable = segLen - setbackAt(anchors, i, closed) - setbackAt(anchors, j, closed)
+    if (usable > 0) {
+      bound = Math.min(bound, 2 * usable / WIDTH_TRANSITION_SLOPE)
+    } else {
+      // Heavily filleted corners back-to-back: be conservative.
+      bound = Math.min(bound, segLen * WIDTH_ARC_MARGIN)
+    }
+  }
+  return Math.max(0, bound)
+}
+
+export function safeMaxWidthForDesign(design: TrackDesign): number[] {
+  return design.anchors.map((_, i) =>
+    safeMaxWidthAt(design.anchors, i, design.closed),
+  )
+}
+
 export type Segment =
   | { kind: 'line'; a: Vec2; b: Vec2 }
   | {

@@ -5,8 +5,9 @@ import {
   getMaxFilletRadius,
   getSegments,
   clampAnchorRadii,
+  safeMaxWidthAt,
 } from '../geometry'
-import { Anchor, TrackDesign, TRACK_DESIGN_VERSION } from '../types'
+import { Anchor, ANCHOR_W_MAX, TrackDesign, TRACK_DESIGN_VERSION } from '../types'
 
 const a = (x: number, y: number, r: number, id = `${x},${y}`): Anchor => ({
   id,
@@ -124,6 +125,28 @@ describe('getMaxFilletRadius', () => {
     const anchors = [a(0, 0, 0), a(1, 0, 10), a(1, 1, 0)]
     const clamped = clampAnchorRadii(anchors, false)
     expect(clamped[1].r).toBeLessThanOrEqual(0.5 + 1e-9)
+  })
+})
+
+describe('safeMaxWidthAt', () => {
+  it('endpoints of an open path are unconstrained at the corner itself', () => {
+    const anchors = [a(0, 0, 0), a(1, 0, 0.1), a(1, 1, 0)]
+    // endpoints have no curvature; bound comes only from segment length
+    const w0 = safeMaxWidthAt(anchors, 0, false)
+    expect(w0).toBeGreaterThan(0)
+  })
+
+  it('tight 90° corner with small fillet bounds width to ~2r * margin', () => {
+    const anchors = [a(0, 0, 0), a(1, 0, 0.05), a(1, 1, 0)]
+    const w = safeMaxWidthAt(anchors, 1, false)
+    expect(w).toBeLessThanOrEqual(0.05 * 2 * 0.9 + 1e-9)
+  })
+
+  it('short adjacent segment caps width via the segment bound', () => {
+    const anchors = [a(0, 0, 0), a(0.15, 0, 0.05), a(0.30, 0.30, 0)]
+    const w = safeMaxWidthAt(anchors, 1, false)
+    expect(w).toBeLessThanOrEqual(ANCHOR_W_MAX + 1e-9)
+    expect(w).toBeLessThan(0.2)
   })
 })
 
