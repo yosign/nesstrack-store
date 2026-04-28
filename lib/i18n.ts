@@ -14,6 +14,7 @@ const en = {
     line2: 'TRACK MATS',
     subtitle: 'Professional-grade custom-printed track mats for RC drift & racing. PVC · Race Cloth · Brick-A materials.',
     shopTracks: 'SHOP TRACKS',
+    designOwn: 'DESIGN YOUR OWN',
     learnMore: 'LEARN MORE',
     stats: {
       materialsLabel: 'MATERIALS',
@@ -125,6 +126,7 @@ const zh: typeof en = {
     line2: '赛道地垫',
     subtitle: '专业级定制印刷赛道地垫，适用于 RC 漂移与竞速。PVC · 油画布 · 砖纹材质。',
     shopTracks: '浏览赛道',
+    designOwn: '定制赛道',
     learnMore: '了解材质',
     stats: {
       materialsLabel: '材质种类',

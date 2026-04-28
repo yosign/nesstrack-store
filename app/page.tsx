@@ -615,8 +615,9 @@ export default function HomePage() {
 
             {/* Buttons */}
             <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <HeroCtaPrimary label={t.hero.shopTracks} />
-              <HeroCtaSecondary label={t.hero.learnMore} />
+              <HeroCtaPrimary label={t.hero.shopTracks} href="#tracks" />
+              <HeroCtaSecondary label={t.hero.designOwn} href="/customize" />
+              <HeroCtaSecondary label={t.hero.learnMore} href="#materials" />
             </div>
 
             {/* Spec strip */}
@@ -1006,12 +1007,12 @@ function HeaderOrderBtn({ label }: { label: string }) {
   )
 }
 
-function HeroCtaPrimary({ label }: { label: string }) {
+function HeroCtaPrimary({ label, href }: { label: string; href: string }) {
   const ref = useRef<HTMLAnchorElement>(null)
   return (
     <Link
       ref={ref}
-      href="#tracks"
+      href={href}
       style={{
         fontFamily: 'var(--font-dm-sans)',
         fontSize: '0.8rem',
@@ -1036,12 +1037,12 @@ function HeroCtaPrimary({ label }: { label: string }) {
   )
 }
 
-function HeroCtaSecondary({ label }: { label: string }) {
+function HeroCtaSecondary({ label, href }: { label: string; href: string }) {
   const ref = useRef<HTMLAnchorElement>(null)
   return (
     <Link
       ref={ref}
-      href="#materials"
+      href={href}
       style={{
         fontFamily: 'var(--font-dm-sans)',
         fontSize: '0.8rem',

@@ -7,6 +7,9 @@ import { tracks } from '@/lib/tracks'
 import { MATERIALS, MaterialType, getTrackDisplayName } from '@/lib/types'
 import { translations, type Translations } from '@/lib/i18n'
 import { useLocale } from '@/lib/use-locale'
+import { TrackPreview } from '@/components/track-design/TrackPath'
+import { parseDesign, DesignParseError } from '@/lib/track-design/serialize'
+import type { TrackDesign } from '@/lib/track-design/types'
 
 type OrderStatus = 'pending' | 'in_production' | 'shipped'
 
@@ -14,7 +17,7 @@ interface Order {
   id: string
   order_number: string
   address: string
-  track_id: string
+  track_id: string | null
   track_ids: string[] | null
   material: MaterialType
   status: OrderStatus
@@ -24,6 +27,8 @@ interface Order {
   created_at?: string
   pending_at?: string
   notes?: string | null
+  custom_track_design?: unknown
+  custom_track_preview_url?: string | null
 }
 
 const STEPS: OrderStatus[] = ['pending', 'in_production', 'shipped']
@@ -289,11 +294,21 @@ export default function TrackPage({
 }
 
 function OrderCard({ order, t }: { order: Order; t: Translations }) {
-  const trackList = (
-    order.track_ids
-      ? order.track_ids.map((id) => tracks.find((t) => t.id === id)).filter(Boolean)
-      : [tracks.find((t) => t.id === order.track_id)].filter(Boolean)
-  ) as (typeof tracks)[number][]
+  let customDesign: TrackDesign | null = null
+  if (order.custom_track_design) {
+    try {
+      customDesign = parseDesign(order.custom_track_design)
+    } catch (err) {
+      if (!(err instanceof DesignParseError)) console.error(err)
+    }
+  }
+  const trackList = customDesign
+    ? []
+    : ((order.track_ids
+        ? order.track_ids.map((id) => tracks.find((t) => t.id === id)).filter(Boolean)
+        : order.track_id
+        ? [tracks.find((t) => t.id === order.track_id)].filter(Boolean)
+        : []) as (typeof tracks)[number][])
 
   const currentStep = STEPS.indexOf(order.status)
   const material = MATERIALS[order.material]
@@ -387,6 +402,43 @@ function OrderCard({ order, t }: { order: Order; t: Translations }) {
           )
         })}
       </div>
+
+      {/* Custom design preview */}
+      {customDesign && (
+        <div style={{ marginBottom: 20 }}>
+          <div
+            style={{
+              aspectRatio: `${customDesign.bboxW} / ${customDesign.bboxH}`,
+              maxHeight: 240,
+              background: '#0d0d0d',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
+            <TrackPreview design={customDesign} showFrame />
+          </div>
+          <div
+            style={{
+              fontFamily: 'var(--font-bebas)',
+              fontSize: '0.95rem',
+              letterSpacing: '0.08em',
+              marginTop: 8,
+              color: '#fff',
+            }}
+          >
+            CUSTOM · {customDesign.bboxW} × {customDesign.bboxH} M
+          </div>
+          <div
+            style={{
+              fontFamily: 'var(--font-dm-sans)',
+              fontSize: '0.7rem',
+              color: 'rgba(255,255,255,0.45)',
+              marginTop: 2,
+            }}
+          >
+            {customDesign.anchors.length} anchors · {customDesign.closed ? 'closed loop' : 'open path'} · stroke {(customDesign.strokeW * 100).toFixed(1)} cm
+          </div>
+        </div>
+      )}
 
       {/* Track thumbnails */}
       {trackList.length > 0 && (

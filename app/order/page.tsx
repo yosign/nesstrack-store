@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useState, useRef } from 'react'
+import { use, useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { tracks } from '@/lib/tracks'
@@ -8,6 +8,12 @@ import { MATERIALS, MaterialType, getTrackDisplayName } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 import { translations } from '@/lib/i18n'
 import { useLocale } from '@/lib/use-locale'
+import { TrackDesign } from '@/lib/track-design/types'
+import { parseDesign, DesignParseError } from '@/lib/track-design/serialize'
+import { TrackPreview } from '@/components/track-design/TrackPath'
+import { renderPreviewPng } from '@/lib/track-design/preview'
+
+const CUSTOM_DESIGN_SESSION_PREFIX = 'nest:custom-design:'
 
 function TrackThumb({ src, alt }: { src: string; alt: string }) {
   const imgRef = useRef<HTMLImageElement>(null)
@@ -62,6 +68,29 @@ export default function OrderPage({
     .map((id) => tracks.find((t) => t.id === id))
     .filter(Boolean) as (typeof tracks)[number][]
 
+  const customDesignTokenParam = params.customDesignToken
+  const customDesignToken = Array.isArray(customDesignTokenParam)
+    ? customDesignTokenParam[0]
+    : customDesignTokenParam
+  const [customDesign, setCustomDesign] = useState<TrackDesign | null>(null)
+  const [customDesignLoaded, setCustomDesignLoaded] = useState(false)
+
+  useEffect(() => {
+    if (!customDesignToken) {
+      setCustomDesignLoaded(true)
+      return
+    }
+    try {
+      const raw = sessionStorage.getItem(CUSTOM_DESIGN_SESSION_PREFIX + customDesignToken)
+      if (raw) setCustomDesign(parseDesign(raw))
+    } catch (err) {
+      if (err instanceof DesignParseError) console.error('invalid stored design', err)
+      else console.error(err)
+    } finally {
+      setCustomDesignLoaded(true)
+    }
+  }, [customDesignToken])
+
   const locale = useLocale()
   const t = translations[locale]
 
@@ -72,7 +101,17 @@ export default function OrderPage({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  if (selectedTracks.length === 0) {
+  const isCustom = !!customDesign
+  const showEmpty = !isCustom && selectedTracks.length === 0 && customDesignLoaded
+  const showWaiting = !!customDesignToken && !customDesignLoaded
+
+  if (showWaiting) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#080808' }} />
+    )
+  }
+
+  if (showEmpty) {
     return (
       <div
         style={{
@@ -135,11 +174,21 @@ export default function OrderPage({
       const dealerToken = crypto.randomUUID()
       const supplierToken = crypto.randomUUID()
 
-      const { error: dbError } = await supabase.from('orders').insert({
+      let previewUrl: string | null = null
+      if (isCustom && customDesign) {
+        const png = await renderPreviewPng(customDesign)
+        const path = `${orderNumber}.png`
+        const { error: uploadErr } = await supabase.storage
+          .from('track-previews')
+          .upload(path, png, { contentType: 'image/png', upsert: false })
+        if (uploadErr) throw uploadErr
+        const { data: publicUrl } = supabase.storage.from('track-previews').getPublicUrl(path)
+        previewUrl = publicUrl.publicUrl
+      }
+
+      const orderRow: Record<string, unknown> = {
         order_number: orderNumber,
         address,
-        track_id: selectedTracks[0].id,
-        track_ids: trackIds,
         material,
         status: 'pending',
         production_status: 'pending',
@@ -147,10 +196,23 @@ export default function OrderPage({
         supplier_token: supplierToken,
         pending_at: new Date().toISOString(),
         notes: notes || null,
-      })
+      }
+      if (isCustom && customDesign) {
+        orderRow.custom_track_design = customDesign
+        orderRow.custom_track_preview_url = previewUrl
+      } else {
+        orderRow.track_id = selectedTracks[0].id
+        orderRow.track_ids = trackIds
+      }
 
+      const { error: dbError } = await supabase.from('orders').insert(orderRow)
       if (dbError) throw dbError
 
+      if (customDesignToken) {
+        try {
+          sessionStorage.removeItem(CUSTOM_DESIGN_SESSION_PREFIX + customDesignToken)
+        } catch {}
+      }
       router.push(`/order/success?token=${dealerToken}`)
     } catch (err) {
       console.error(err)
@@ -349,9 +411,17 @@ export default function OrderPage({
             >
               <div style={sectionLabel}>{t.order.summary}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {selectedTracks.map((track) => (
-                  <div key={track.id}>
-                    <TrackThumb src={track.thumbnailUrl} alt={getTrackDisplayName(track)} />
+                {isCustom && customDesign ? (
+                  <div>
+                    <div
+                      style={{
+                        position: 'relative',
+                        aspectRatio: `${customDesign.bboxW} / ${customDesign.bboxH}`,
+                        background: '#0d0d0d',
+                      }}
+                    >
+                      <TrackPreview design={customDesign} showFrame />
+                    </div>
                     <div
                       style={{
                         fontFamily: 'var(--font-bebas)',
@@ -361,10 +431,37 @@ export default function OrderPage({
                         color: '#fff',
                       }}
                     >
-                      {getTrackDisplayName(track)}
+                      CUSTOM · {customDesign.bboxW} × {customDesign.bboxH} M
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-dm-sans)',
+                        fontSize: '0.7rem',
+                        color: 'rgba(255,255,255,0.45)',
+                        marginTop: 4,
+                      }}
+                    >
+                      {customDesign.anchors.length} anchors · {customDesign.closed ? 'closed' : 'open'} · stroke {(customDesign.strokeW * 100).toFixed(1)} cm
                     </div>
                   </div>
-                ))}
+                ) : (
+                  selectedTracks.map((track) => (
+                    <div key={track.id}>
+                      <TrackThumb src={track.thumbnailUrl} alt={getTrackDisplayName(track)} />
+                      <div
+                        style={{
+                          fontFamily: 'var(--font-bebas)',
+                          fontSize: '1.1rem',
+                          letterSpacing: '0.08em',
+                          marginTop: 8,
+                          color: '#fff',
+                        }}
+                      >
+                        {getTrackDisplayName(track)}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
