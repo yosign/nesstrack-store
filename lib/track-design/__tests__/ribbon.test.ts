@@ -50,7 +50,7 @@ describe('buildRibbon — width variation', () => {
       if (s.w < minW) minW = s.w
       if (s.w > maxW) maxW = s.w
     }
-    expect(maxW / minW).toBeGreaterThan(1.4)
+    expect(maxW / minW).toBeGreaterThan(1.2)
   })
 
   it('drift-snake template shows clear width variation across samples', () => {
@@ -63,6 +63,6 @@ describe('buildRibbon — width variation', () => {
       if (s.w < minW) minW = s.w
       if (s.w > maxW) maxW = s.w
     }
-    expect(maxW / minW).toBeGreaterThan(1.3)
+    expect(maxW / minW).toBeGreaterThan(1.2)
   })
 })

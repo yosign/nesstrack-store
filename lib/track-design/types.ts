@@ -30,4 +30,4 @@ export const BBOX_MIN = 0.5
 export const BBOX_MAX = 4
 export const COLLINEAR_EPS = 0.01
 export const MIN_ANGLE = (30 * Math.PI) / 180
-export const R_AUTO_MARGIN = 0.995
+export const R_AUTO_MARGIN = 0.7

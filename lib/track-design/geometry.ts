@@ -193,8 +193,7 @@ export function maxAnchorWidth(design: TrackDesign): number {
   return m
 }
 
-const WIDTH_ARC_MARGIN = 0.9
-const WIDTH_TRANSITION_SLOPE = 1.5
+const WIDTH_ARC_MARGIN = 0.7
 const HALF_PI = Math.PI / 2
 
 function resolvedFilletR(anchors: Anchor[], i: number, closed: boolean): number {
@@ -236,7 +235,7 @@ export function safeMaxWidthAt(
   const n = anchors.length
   if (n < 2) return Number.POSITIVE_INFINITY
   const a = anchors[i]
-  // Arc bound: inner offset radius (r - w/2) must remain positive.
+  // Arc bound: inner offset radius (r - w/2) must remain visible (≥30% of r).
   let bound = Number.POSITIVE_INFINITY
   const isInterior = closed || (i !== 0 && i !== n - 1)
   if (isInterior && n >= 3) {
@@ -260,25 +259,6 @@ export function safeMaxWidthAt(
         )
         bound = Math.min(bound, minSeg * Math.tan(half) * WIDTH_ARC_MARGIN)
       }
-    }
-  }
-  // Segment bound: width transition along each adjoining straight needs
-  // enough usable length so the inner offsets of neighboring fillets clear.
-  const neighbors: number[] = []
-  if (closed) {
-    neighbors.push((i + 1) % n, (i - 1 + n) % n)
-  } else {
-    if (i < n - 1) neighbors.push(i + 1)
-    if (i > 0) neighbors.push(i - 1)
-  }
-  for (const j of neighbors) {
-    const segLen = segmentLen(anchors, i, j)
-    const usable = segLen - setbackAt(anchors, i, closed) - setbackAt(anchors, j, closed)
-    if (usable > 0) {
-      bound = Math.min(bound, 2 * usable / WIDTH_TRANSITION_SLOPE)
-    } else {
-      // Heavily filleted corners back-to-back: be conservative.
-      bound = Math.min(bound, segLen * WIDTH_ARC_MARGIN)
     }
   }
   return Math.max(0, bound)
