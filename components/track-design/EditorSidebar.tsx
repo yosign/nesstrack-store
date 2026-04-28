@@ -91,7 +91,7 @@ export function EditorSidebar({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       <section>
-        <div style={sectionLabel}>DEFAULT WIDTH</div>
+        <div style={sectionLabel}>TRACK WIDTH</div>
         <div
           style={{
             display: 'flex',
@@ -130,7 +130,7 @@ export function EditorSidebar({
             marginTop: 4,
           }}
         >
-          Applies to anchors set to AUTO width.
+          Scales the entire track. Per-anchor widths below override locally.
         </div>
       </section>
 

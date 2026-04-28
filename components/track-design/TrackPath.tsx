@@ -28,9 +28,13 @@ export function TrackPath({
   const ribbon = buildRibbon(design)
   if (!ribbon) return null
   const ref = maxAnchorWidth(design)
-  const curbW = Math.max(0.005, ref * 0.05)
-  const centerW = Math.max(0.004, ref * 0.04)
-  const dash = `${ref * 0.6} ${ref * 0.45}`
+  // Curb / centerline strokes are physical kerb-paint lines — keep them at a
+  // constant ~1 cm regardless of track width, like a real RC mat. Only the
+  // dash spacing scales subtly with the design size.
+  const curbW = 0.012
+  const centerW = 0.008
+  const dashUnit = Math.max(0.06, ref * 0.55)
+  const dash = `${dashUnit} ${dashUnit * 0.7}`
   const fill = isInvalid ? invalidColor : bodyColor
   const pe = interactive ? 'none' : undefined
   return (
@@ -57,8 +61,8 @@ export function TrackPath({
         />
       )}
       {ribbon.kerbs.map((k, i) => {
-        const kerbStripe = Math.max(0.04, ref * 0.35)
-        const kerbW = Math.max(0.012, ref * 0.18)
+        const kerbStripe = Math.max(0.05, ref * 0.30)
+        const kerbW = 0.026
         const baseColor = '#2196d3'
         return (
           <g key={`kerb-${i}`}>

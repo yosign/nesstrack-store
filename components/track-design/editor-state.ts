@@ -156,7 +156,13 @@ export function setAnchorWidthAuto(design: TrackDesign, id: string): TrackDesign
 
 export function setStrokeW(design: TrackDesign, w: number): TrackDesign {
   const clamped = Math.max(STROKE_W_MIN, Math.min(STROKE_W_MAX, w))
-  return { ...design, strokeW: clamped }
+  const ratio = design.strokeW > 0 ? clamped / design.strokeW : 1
+  const anchors = design.anchors.map((a) =>
+    typeof a.w === 'number' && isFinite(a.w)
+      ? { ...a, w: Math.max(ANCHOR_W_MIN, Math.min(ANCHOR_W_MAX, a.w * ratio)) }
+      : a,
+  )
+  return { ...design, strokeW: clamped, anchors }
 }
 
 export function toggleClosed(design: TrackDesign): TrackDesign {
