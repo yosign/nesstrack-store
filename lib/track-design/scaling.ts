@@ -20,6 +20,7 @@ export function scaleDesignToBbox(
       x: a.x * s + offX,
       y: a.y * s + offY,
       r: a.r * s,
+      w: typeof a.w === 'number' ? a.w * s : a.w,
     })),
   }
 }

@@ -1,5 +1,6 @@
 import { TrackDesign, Vec2 } from './types'
-import { getSegments, Segment } from './geometry'
+import { getSegments, maxAnchorWidth, Segment } from './geometry'
+import { buildRibbon, ribbonExtent } from './ribbon'
 
 const TAU = Math.PI * 2
 const normAngle = (a: number): number => ((a % TAU) + TAU) % TAU
@@ -76,40 +77,30 @@ export type BoundsResult = {
 }
 
 export function validateBounds(design: TrackDesign): BoundsResult {
-  const segments = getSegments(design)
-  const half = design.strokeW / 2
+  const ribbon = buildRibbon(design)
+  if (!ribbon) {
+    return {
+      ok: true,
+      violations: [],
+      extent: { minX: 0, maxX: 0, minY: 0, maxY: 0 },
+    }
+  }
+  const ext = ribbonExtent(ribbon)
   const violations: BoundsViolation[] = []
-  let minX = Infinity
-  let maxX = -Infinity
-  let minY = Infinity
-  let maxY = -Infinity
-
-  segments.forEach((seg, idx) => {
-    const ext = segmentExtent(seg)
-    const sMinX = ext.minX - half
-    const sMaxX = ext.maxX + half
-    const sMinY = ext.minY - half
-    const sMaxY = ext.maxY + half
-    if (sMinX < minX) minX = sMinX
-    if (sMaxX > maxX) maxX = sMaxX
-    if (sMinY < minY) minY = sMinY
-    if (sMaxY > maxY) maxY = sMaxY
-
-    if (sMinX < 0) violations.push({ segmentIndex: idx, side: 'left', excess: -sMinX })
-    if (sMaxX > design.bboxW) violations.push({ segmentIndex: idx, side: 'right', excess: sMaxX - design.bboxW })
-    if (sMinY < 0) violations.push({ segmentIndex: idx, side: 'top', excess: -sMinY })
-    if (sMaxY > design.bboxH) violations.push({ segmentIndex: idx, side: 'bottom', excess: sMaxY - design.bboxH })
-  })
-
+  if (ext.minX < 0) violations.push({ segmentIndex: 0, side: 'left', excess: -ext.minX })
+  if (ext.maxX > design.bboxW) violations.push({ segmentIndex: 0, side: 'right', excess: ext.maxX - design.bboxW })
+  if (ext.minY < 0) violations.push({ segmentIndex: 0, side: 'top', excess: -ext.minY })
+  if (ext.maxY > design.bboxH) violations.push({ segmentIndex: 0, side: 'bottom', excess: ext.maxY - design.bboxH })
   return {
     ok: violations.length === 0,
     violations,
-    extent: { minX, maxX, minY, maxY },
+    extent: ext,
   }
 }
 
 export function maxStrokeForDesign(design: TrackDesign): number {
-  const probe: TrackDesign = { ...design, strokeW: 0 }
+  const zeroAnchors = design.anchors.map((a) => ({ ...a, w: 0, wAuto: false }))
+  const probe: TrackDesign = { ...design, strokeW: 0, anchors: zeroAnchors }
   const segments = getSegments(probe)
   let minX = Infinity
   let maxX = -Infinity

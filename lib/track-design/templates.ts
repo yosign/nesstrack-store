@@ -69,7 +69,13 @@ const rawTemplates: Record<string, Template> = {
 export const handcraftedTemplates: Record<string, Template> = Object.fromEntries(
   Object.entries(rawTemplates).map(([key, t]) => [
     key,
-    { ...t, anchors: clampAnchorRadii(t.anchors, t.closed) },
+    {
+      ...t,
+      anchors: clampAnchorRadii(
+        t.anchors.map((a) => ({ ...a, wAuto: true })),
+        t.closed,
+      ),
+    },
   ]),
 )
 

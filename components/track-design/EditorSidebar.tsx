@@ -1,7 +1,13 @@
 'use client'
 
-import { TrackDesign, STROKE_W_MIN, STROKE_W_MAX } from '@/lib/track-design/types'
-import { getMaxFilletRadius } from '@/lib/track-design/geometry'
+import {
+  TrackDesign,
+  STROKE_W_MIN,
+  STROKE_W_MAX,
+  ANCHOR_W_MIN,
+  ANCHOR_W_MAX,
+} from '@/lib/track-design/types'
+import { getMaxFilletRadius, widthAt } from '@/lib/track-design/geometry'
 import { BoundsResult, maxStrokeForDesign } from '@/lib/track-design/bounds'
 
 const sectionLabel: React.CSSProperties = {
@@ -19,6 +25,17 @@ const valueText: React.CSSProperties = {
   color: '#fff',
 }
 
+const ghostBtn: React.CSSProperties = {
+  padding: '4px 10px',
+  background: 'transparent',
+  border: '1px solid rgba(255,255,255,0.18)',
+  color: 'rgba(255,255,255,0.7)',
+  fontFamily: 'var(--font-bebas)',
+  letterSpacing: '0.1em',
+  fontSize: '0.7rem',
+  cursor: 'pointer',
+}
+
 export type EditorSidebarProps = {
   design: TrackDesign
   bounds: BoundsResult
@@ -26,6 +43,9 @@ export type EditorSidebarProps = {
   onSetStrokeW: (w: number) => void
   onCommit: () => void
   onSetSelectedRadius: (r: number) => void
+  onResetSelectedRadius: () => void
+  onSetSelectedWidth: (w: number) => void
+  onResetSelectedWidth: () => void
   onDeleteSelected: () => void
   onSubmit: () => void
   submitLabel: string
@@ -39,6 +59,9 @@ export function EditorSidebar({
   onSetStrokeW,
   onCommit,
   onSetSelectedRadius,
+  onResetSelectedRadius,
+  onSetSelectedWidth,
+  onResetSelectedWidth,
   onDeleteSelected,
   onSubmit,
   submitLabel,
@@ -52,11 +75,14 @@ export function EditorSidebar({
   const cappedMaxR = Math.min(maxR, Math.max(design.bboxW, design.bboxH) / 2)
   const headroomStroke = maxStrokeForDesign(design)
   const strokeMaxAvail = Math.min(STROKE_W_MAX, headroomStroke || STROKE_W_MAX)
+  const selectedW = selected ? widthAt(selected, design) : 0
+  const selectedWidthIsAuto = selected ? !!selected.wAuto || typeof selected.w !== 'number' : false
+  const selectedRadiusIsAuto = selected ? !!selected.rAuto : false
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       <section>
-        <div style={sectionLabel}>STROKE WIDTH</div>
+        <div style={sectionLabel}>DEFAULT WIDTH</div>
         <div
           style={{
             display: 'flex',
@@ -87,6 +113,16 @@ export function EditorSidebar({
           onKeyUp={onCommit}
           style={{ width: '100%', accentColor: '#00B4D8' }}
         />
+        <div
+          style={{
+            fontSize: '0.65rem',
+            color: 'rgba(255,255,255,0.35)',
+            fontFamily: 'var(--font-dm-sans)',
+            marginTop: 4,
+          }}
+        >
+          Applies to anchors set to AUTO width.
+        </div>
       </section>
 
       <section>
@@ -107,6 +143,7 @@ export function EditorSidebar({
                 ({selected.x.toFixed(2)}, {selected.y.toFixed(2)})
               </span>
             </div>
+
             <div
               style={{
                 display: 'flex',
@@ -115,8 +152,50 @@ export function EditorSidebar({
                 marginBottom: 6,
               }}
             >
+              <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }}>track width</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span style={valueText}>
+                  {(selectedW * 100).toFixed(1)} CM{selectedWidthIsAuto ? ' · AUTO' : ''}
+                </span>
+                {!selectedWidthIsAuto && (
+                  <button type="button" onClick={onResetSelectedWidth} style={ghostBtn}>
+                    AUTO
+                  </button>
+                )}
+              </div>
+            </div>
+            <input
+              type="range"
+              min={ANCHOR_W_MIN}
+              max={ANCHOR_W_MAX}
+              step={0.005}
+              value={Math.min(ANCHOR_W_MAX, Math.max(ANCHOR_W_MIN, selectedW))}
+              onChange={(e) => onSetSelectedWidth(parseFloat(e.target.value))}
+              onPointerUp={onCommit}
+              onKeyUp={onCommit}
+              style={{ width: '100%', accentColor: '#00B4D8' }}
+            />
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                marginTop: 14,
+                marginBottom: 6,
+              }}
+            >
               <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }}>fillet radius</span>
-              <span style={valueText}>{(selected.r * 100).toFixed(1)} CM</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span style={valueText}>
+                  {(selected.r * 100).toFixed(1)} CM{selectedRadiusIsAuto ? ' · AUTO' : ''}
+                </span>
+                {!selectedRadiusIsAuto && (
+                  <button type="button" onClick={onResetSelectedRadius} style={ghostBtn}>
+                    AUTO
+                  </button>
+                )}
+              </div>
             </div>
             <input
               type="range"
@@ -130,6 +209,7 @@ export function EditorSidebar({
               disabled={cappedMaxR <= 0}
               style={{ width: '100%', accentColor: '#00B4D8' }}
             />
+
             <button
               type="button"
               onClick={onDeleteSelected}
@@ -156,7 +236,7 @@ export function EditorSidebar({
               fontFamily: 'var(--font-dm-sans)',
             }}
           >
-            Click an anchor to edit its fillet radius.
+            Click an anchor to edit its width and fillet.
           </div>
         )}
       </section>
@@ -173,7 +253,7 @@ export function EditorSidebar({
         >
           {bounds.ok
             ? `${design.anchors.length} anchor${design.anchors.length === 1 ? '' : 's'} · ${design.closed ? 'closed' : 'open'} · within bounds`
-            : `${bounds.violations.length} bounds violation${bounds.violations.length === 1 ? '' : 's'} — reduce stroke width or move anchors inward`}
+            : `${bounds.violations.length} bounds violation${bounds.violations.length === 1 ? '' : 's'} — reduce widths or move anchors inward`}
         </div>
       </section>
 

@@ -1,4 +1,11 @@
-import { TrackDesign, Anchor, STROKE_W_MIN, STROKE_W_MAX } from '@/lib/track-design/types'
+import {
+  TrackDesign,
+  Anchor,
+  STROKE_W_MIN,
+  STROKE_W_MAX,
+  ANCHOR_W_MIN,
+  ANCHOR_W_MAX,
+} from '@/lib/track-design/types'
 import { clampAnchorRadii } from '@/lib/track-design/geometry'
 
 const MAX_HISTORY = 80
@@ -62,7 +69,15 @@ function designsEqual(a: TrackDesign, b: TrackDesign): boolean {
   for (let i = 0; i < a.anchors.length; i++) {
     const x = a.anchors[i]
     const y = b.anchors[i]
-    if (x.id !== y.id || x.x !== y.x || x.y !== y.y || x.r !== y.r) return false
+    if (
+      x.id !== y.id ||
+      x.x !== y.x ||
+      x.y !== y.y ||
+      x.r !== y.r ||
+      (x.rAuto ?? false) !== (y.rAuto ?? false) ||
+      (x.w ?? null) !== (y.w ?? null) ||
+      (x.wAuto ?? false) !== (y.wAuto ?? false)
+    ) return false
   }
   return true
 }
@@ -77,8 +92,11 @@ export function withClampedRadii(design: TrackDesign): TrackDesign {
   return { ...design, anchors: clampAnchorRadii(design.anchors, design.closed) }
 }
 
-export function appendAnchor(design: TrackDesign, x: number, y: number, defaultR: number): TrackDesign {
-  const anchors: Anchor[] = [...design.anchors, { id: nextAnchorId(), x, y, r: defaultR }]
+export function appendAnchor(design: TrackDesign, x: number, y: number): TrackDesign {
+  const anchors: Anchor[] = [
+    ...design.anchors,
+    { id: nextAnchorId(), x, y, r: 0, rAuto: true, wAuto: true },
+  ]
   return withClampedRadii({ ...design, anchors })
 }
 
@@ -87,10 +105,9 @@ export function insertAnchorAfter(
   afterIndex: number,
   x: number,
   y: number,
-  defaultR: number,
 ): TrackDesign {
   const anchors = [...design.anchors]
-  anchors.splice(afterIndex + 1, 0, { id: nextAnchorId(), x, y, r: defaultR })
+  anchors.splice(afterIndex + 1, 0, { id: nextAnchorId(), x, y, r: 0, rAuto: true, wAuto: true })
   return withClampedRadii({ ...design, anchors })
 }
 
@@ -109,8 +126,32 @@ export function deleteAnchor(design: TrackDesign, id: string): TrackDesign {
 }
 
 export function setAnchorRadius(design: TrackDesign, id: string, r: number): TrackDesign {
-  const anchors = design.anchors.map((a) => (a.id === id ? { ...a, r: Math.max(0, r) } : a))
+  const anchors = design.anchors.map((a) =>
+    a.id === id ? { ...a, r: Math.max(0, r), rAuto: false } : a,
+  )
   return withClampedRadii({ ...design, anchors })
+}
+
+export function setAnchorRadiusAuto(design: TrackDesign, id: string): TrackDesign {
+  const anchors = design.anchors.map((a) =>
+    a.id === id ? { ...a, rAuto: true } : a,
+  )
+  return withClampedRadii({ ...design, anchors })
+}
+
+export function setAnchorWidth(design: TrackDesign, id: string, w: number): TrackDesign {
+  const clamped = Math.max(ANCHOR_W_MIN, Math.min(ANCHOR_W_MAX, w))
+  const anchors = design.anchors.map((a) =>
+    a.id === id ? { ...a, w: clamped, wAuto: false } : a,
+  )
+  return { ...design, anchors }
+}
+
+export function setAnchorWidthAuto(design: TrackDesign, id: string): TrackDesign {
+  const anchors = design.anchors.map((a) =>
+    a.id === id ? { ...a, wAuto: true } : a,
+  )
+  return { ...design, anchors }
 }
 
 export function setStrokeW(design: TrackDesign, w: number): TrackDesign {

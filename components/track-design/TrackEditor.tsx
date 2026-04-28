@@ -13,6 +13,9 @@ import {
   moveAnchor as moveAnchorState,
   deleteAnchor,
   setAnchorRadius,
+  setAnchorRadiusAuto,
+  setAnchorWidth,
+  setAnchorWidthAuto,
   setStrokeW,
   toggleClosed,
   clearAnchors,
@@ -49,7 +52,7 @@ export function TrackEditor({ initialDesign, onSubmit, submitLabel = 'USE THIS D
 
   const handleAddAnchor = useCallback(
     (x: number, y: number) => {
-      commit(appendAnchor(design, x, y, design.strokeW * 1.5))
+      commit(appendAnchor(design, x, y))
     },
     [commit, design],
   )
@@ -97,6 +100,24 @@ export function TrackEditor({ initialDesign, onSubmit, submitLabel = 'USE THIS D
     },
     [replaceInTx, design, state.selectedAnchorId],
   )
+
+  const handleResetSelectedRadius = useCallback(() => {
+    if (!state.selectedAnchorId) return
+    commit(setAnchorRadiusAuto(design, state.selectedAnchorId))
+  }, [commit, design, state.selectedAnchorId])
+
+  const handleSetSelectedWidth = useCallback(
+    (w: number) => {
+      if (!state.selectedAnchorId) return
+      replaceInTx(setAnchorWidth(design, state.selectedAnchorId, w))
+    },
+    [replaceInTx, design, state.selectedAnchorId],
+  )
+
+  const handleResetSelectedWidth = useCallback(() => {
+    if (!state.selectedAnchorId) return
+    commit(setAnchorWidthAuto(design, state.selectedAnchorId))
+  }, [commit, design, state.selectedAnchorId])
 
   const handleDeleteSelected = useCallback(() => {
     if (state.selectedAnchorId) handleDelete(state.selectedAnchorId)
@@ -173,6 +194,9 @@ export function TrackEditor({ initialDesign, onSubmit, submitLabel = 'USE THIS D
         onSetStrokeW={handleSetStrokeW}
         onCommit={endTx}
         onSetSelectedRadius={handleSetSelectedRadius}
+        onResetSelectedRadius={handleResetSelectedRadius}
+        onSetSelectedWidth={handleSetSelectedWidth}
+        onResetSelectedWidth={handleResetSelectedWidth}
         onDeleteSelected={handleDeleteSelected}
         onSubmit={() => onSubmit(design)}
         submitLabel={submitLabel}

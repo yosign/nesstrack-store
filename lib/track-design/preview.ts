@@ -1,23 +1,50 @@
 import { TrackDesign } from './types'
-import { buildSvgPath } from './geometry'
+import { buildRibbon } from './ribbon'
+import { maxAnchorWidth } from './geometry'
 
 export type PreviewOptions = {
   width?: number
   height?: number
   background?: string
-  trackColor?: string
+  bodyColor?: string
+  curbColor?: string
+  centerColor?: string
 }
 
 export function buildPreviewSvgString(design: TrackDesign, opts: PreviewOptions = {}): string {
-  const { bboxW, bboxH, strokeW, closed } = design
+  const { bboxW, bboxH } = design
   const background = opts.background ?? '#0d0d0d'
-  const trackColor = opts.trackColor ?? '#7a7a7a'
-  const d = buildSvgPath(design)
-  const linecap = closed ? 'butt' : 'round'
+  const bodyColor = opts.bodyColor ?? '#3a3a3a'
+  const curbColor = opts.curbColor ?? 'rgba(255,255,255,0.85)'
+  const centerColor = opts.centerColor ?? 'rgba(255,255,255,0.55)'
+  const ribbon = buildRibbon(design)
+  const ref = maxAnchorWidth(design)
+  const curbW = Math.max(0.005, ref * 0.05)
+  const centerW = Math.max(0.004, ref * 0.04)
+  const dash = `${ref * 0.6} ${ref * 0.45}`
+  const layers: string[] = []
+  if (ribbon) {
+    layers.push(
+      `<path d="${ribbon.bodyD}" fill="${bodyColor}" fill-rule="evenodd" stroke="none"/>`,
+    )
+    if (ribbon.outerD) {
+      layers.push(
+        `<path d="${ribbon.outerD}" fill="none" stroke="${curbColor}" stroke-width="${curbW}" stroke-linejoin="round" stroke-linecap="round"/>`,
+      )
+    }
+    if (ribbon.innerD) {
+      layers.push(
+        `<path d="${ribbon.innerD}" fill="none" stroke="${curbColor}" stroke-width="${curbW}" stroke-linejoin="round" stroke-linecap="round"/>`,
+      )
+    }
+    layers.push(
+      `<path d="${ribbon.centerD}" fill="none" stroke="${centerColor}" stroke-width="${centerW}" stroke-dasharray="${dash}" stroke-linecap="butt" stroke-linejoin="round"/>`,
+    )
+  }
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${bboxW} ${bboxH}" preserveAspectRatio="xMidYMid meet">
   <rect x="0" y="0" width="${bboxW}" height="${bboxH}" fill="${background}"/>
-  <path d="${d}" fill="none" stroke="${trackColor}" stroke-width="${strokeW}" stroke-linecap="${linecap}" stroke-linejoin="round"/>
+  ${layers.join('\n  ')}
 </svg>`
 }
 

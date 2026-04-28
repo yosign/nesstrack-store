@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { TrackDesign } from '@/lib/track-design/types'
 import { BoundsResult } from '@/lib/track-design/bounds'
+import { maxAnchorWidth } from '@/lib/track-design/geometry'
 import { TrackPath } from './TrackPath'
 
 type DragState = {
@@ -34,9 +35,10 @@ export function EditorCanvas({
   const svgRef = useRef<SVGSVGElement>(null)
   const [drag, setDrag] = useState<DragState | null>(null)
   const dragMoved = useRef(false)
-  const { bboxW, bboxH, strokeW } = design
-  const half = strokeW / 2
-  const pad = Math.max(strokeW * 0.5, Math.min(bboxW, bboxH) * 0.04)
+  const { bboxW, bboxH } = design
+  const halfMax = maxAnchorWidth(design) / 2
+  const dim = Math.min(bboxW, bboxH)
+  const padOuter = Math.max(dim * 0.12, 0.18)
 
   const toLocal = (clientX: number, clientY: number) => {
     const svg = svgRef.current
@@ -52,8 +54,8 @@ export function EditorCanvas({
     if (e.button !== 0) return
     const p = toLocal(e.clientX, e.clientY)
     if (!p) return
-    const x = Math.max(half, Math.min(bboxW - half, p.x))
-    const y = Math.max(half, Math.min(bboxH - half, p.y))
+    const x = Math.max(halfMax, Math.min(bboxW - halfMax, p.x))
+    const y = Math.max(halfMax, Math.min(bboxH - halfMax, p.y))
     onSelectAnchor(null)
     onAddAnchor(x, y)
   }
@@ -71,8 +73,8 @@ export function EditorCanvas({
     if (!drag || drag.pointerId !== e.pointerId) return
     const p = toLocal(e.clientX, e.clientY)
     if (!p) return
-    const x = Math.max(half, Math.min(bboxW - half, p.x))
-    const y = Math.max(half, Math.min(bboxH - half, p.y))
+    const x = Math.max(halfMax, Math.min(bboxW - halfMax, p.x))
+    const y = Math.max(halfMax, Math.min(bboxH - halfMax, p.y))
     dragMoved.current = true
     onMoveAnchor(drag.anchorId, x, y)
   }
@@ -91,14 +93,18 @@ export function EditorCanvas({
     }
   }
 
-  const violationSet = new Set(bounds.violations.map((v) => v.segmentIndex))
+  const dimensionFontSize = Math.max(0.06, dim * 0.04)
+  const tickLen = Math.max(0.03, dim * 0.02)
+  const dimLineColor = bounds.ok ? 'rgba(0,180,216,0.55)' : 'rgba(255,77,77,0.7)'
+  const dimTextColor = bounds.ok ? 'rgba(255,255,255,0.75)' : '#ff9b9b'
+  const handleR = Math.max(0.04, halfMax * 0.5)
 
   return (
     <svg
       ref={svgRef}
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      viewBox={`${-pad} ${-pad} ${bboxW + pad * 2} ${bboxH + pad * 2}`}
+      viewBox={`${-padOuter} ${-padOuter} ${bboxW + padOuter * 2} ${bboxH + padOuter * 2}`}
       style={{
         background: '#0a0a0a',
         display: 'block',
@@ -135,20 +141,6 @@ export function EditorCanvas({
         onPointerDown={handleSurfaceDown}
       />
 
-      {half > 0 && bboxW > strokeW && bboxH > strokeW && (
-        <rect
-          x={half}
-          y={half}
-          width={bboxW - strokeW}
-          height={bboxH - strokeW}
-          fill="none"
-          stroke="rgba(0,180,216,0.18)"
-          strokeWidth={0.005}
-          strokeDasharray="0.04 0.04"
-          pointerEvents="none"
-        />
-      )}
-
       <rect
         x={0}
         y={0}
@@ -160,11 +152,89 @@ export function EditorCanvas({
         pointerEvents="none"
       />
 
+      {/* Top dimension ruler */}
+      <g pointerEvents="none">
+        <line
+          x1={0}
+          y1={-padOuter * 0.55}
+          x2={bboxW}
+          y2={-padOuter * 0.55}
+          stroke={dimLineColor}
+          strokeWidth={0.005}
+        />
+        <line
+          x1={0}
+          y1={-padOuter * 0.55 - tickLen}
+          x2={0}
+          y2={-padOuter * 0.55 + tickLen}
+          stroke={dimLineColor}
+          strokeWidth={0.005}
+        />
+        <line
+          x1={bboxW}
+          y1={-padOuter * 0.55 - tickLen}
+          x2={bboxW}
+          y2={-padOuter * 0.55 + tickLen}
+          stroke={dimLineColor}
+          strokeWidth={0.005}
+        />
+        <text
+          x={bboxW / 2}
+          y={-padOuter * 0.55 - tickLen * 1.4}
+          fontSize={dimensionFontSize}
+          textAnchor="middle"
+          fill={dimTextColor}
+          fontFamily="var(--font-bebas)"
+          letterSpacing="0.08em"
+        >
+          {bboxW.toFixed(2)} M
+        </text>
+      </g>
+
+      {/* Left dimension ruler */}
+      <g pointerEvents="none">
+        <line
+          x1={-padOuter * 0.55}
+          y1={0}
+          x2={-padOuter * 0.55}
+          y2={bboxH}
+          stroke={dimLineColor}
+          strokeWidth={0.005}
+        />
+        <line
+          x1={-padOuter * 0.55 - tickLen}
+          y1={0}
+          x2={-padOuter * 0.55 + tickLen}
+          y2={0}
+          stroke={dimLineColor}
+          strokeWidth={0.005}
+        />
+        <line
+          x1={-padOuter * 0.55 - tickLen}
+          y1={bboxH}
+          x2={-padOuter * 0.55 + tickLen}
+          y2={bboxH}
+          stroke={dimLineColor}
+          strokeWidth={0.005}
+        />
+        <text
+          x={-padOuter * 0.55 - tickLen * 1.4}
+          y={bboxH / 2}
+          fontSize={dimensionFontSize}
+          textAnchor="middle"
+          fill={dimTextColor}
+          fontFamily="var(--font-bebas)"
+          letterSpacing="0.08em"
+          transform={`rotate(-90 ${-padOuter * 0.55 - tickLen * 1.4} ${bboxH / 2})`}
+        >
+          {bboxH.toFixed(2)} M
+        </text>
+      </g>
+
       <TrackPath design={design} isInvalid={!bounds.ok} />
 
       {design.anchors.map((a, i) => {
         const isSelected = a.id === selectedAnchorId
-        const handleR = Math.max(0.04, strokeW * 0.4)
         return (
           <g
             key={a.id}
@@ -178,8 +248,8 @@ export function EditorCanvas({
               cx={a.x}
               cy={a.y}
               r={handleR + 0.01}
-              fill="rgba(0,0,0,0.4)"
-              stroke={isSelected ? '#00B4D8' : 'rgba(255,255,255,0.6)'}
+              fill="rgba(0,0,0,0.55)"
+              stroke={isSelected ? '#00B4D8' : 'rgba(255,255,255,0.85)'}
               strokeWidth={isSelected ? 0.012 : 0.006}
             />
             <circle
@@ -193,7 +263,7 @@ export function EditorCanvas({
               y={a.y - handleR - 0.03}
               fontSize={0.06}
               textAnchor="middle"
-              fill="rgba(255,255,255,0.6)"
+              fill="rgba(255,255,255,0.75)"
               fontFamily="var(--font-dm-sans)"
               pointerEvents="none"
             >

@@ -3,6 +3,7 @@ import {
   Vec2,
   TrackDesign,
   COLLINEAR_EPS,
+  R_AUTO_MARGIN,
 } from './types'
 
 export const sub = (a: Vec2, b: Vec2): Vec2 => ({ x: a.x - b.x, y: a.y - b.y })
@@ -168,9 +169,28 @@ export function clampAnchorRadii(
 ): Anchor[] {
   return anchors.map((a, i) => {
     const max = getMaxFilletRadius(anchors, i, closed)
-    if (a.r > max) return { ...a, r: Math.max(0, max) }
+    const cap = isFinite(max) ? max : 0
+    if (a.rAuto) {
+      const target = isFinite(max) ? Math.max(0, max * R_AUTO_MARGIN) : 0
+      return { ...a, r: target }
+    }
+    if (a.r > cap) return { ...a, r: Math.max(0, cap) }
     return a
   })
+}
+
+export function widthAt(a: Anchor, design: TrackDesign): number {
+  if (a.wAuto || typeof a.w !== 'number' || !isFinite(a.w)) return design.strokeW
+  return Math.max(0, a.w)
+}
+
+export function maxAnchorWidth(design: TrackDesign): number {
+  let m = design.strokeW
+  for (const a of design.anchors) {
+    const w = widthAt(a, design)
+    if (w > m) m = w
+  }
+  return m
 }
 
 export type Segment =

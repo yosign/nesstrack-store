@@ -1,30 +1,64 @@
 import { TrackDesign } from '@/lib/track-design/types'
-import { buildSvgPath } from '@/lib/track-design/geometry'
+import { buildRibbon } from '@/lib/track-design/ribbon'
+import { maxAnchorWidth } from '@/lib/track-design/geometry'
 
 export type TrackPathProps = {
   design: TrackDesign
-  stroke?: string
-  invalidStroke?: string
   isInvalid?: boolean
+  bodyColor?: string
+  invalidColor?: string
+  curbColor?: string
+  centerColor?: string
 }
 
 export function TrackPath({
   design,
-  stroke = '#7a7a7a',
-  invalidStroke = '#ff4d4d',
   isInvalid = false,
+  bodyColor = '#3a3a3a',
+  invalidColor = '#5a1f1f',
+  curbColor = 'rgba(255,255,255,0.85)',
+  centerColor = 'rgba(255,255,255,0.55)',
 }: TrackPathProps) {
-  const d = buildSvgPath(design)
-  if (!d) return null
+  const ribbon = buildRibbon(design)
+  if (!ribbon) return null
+  const ref = maxAnchorWidth(design)
+  const curbW = Math.max(0.005, ref * 0.05)
+  const centerW = Math.max(0.004, ref * 0.04)
+  const dash = `${ref * 0.6} ${ref * 0.45}`
+  const fill = isInvalid ? invalidColor : bodyColor
   return (
-    <path
-      d={d}
-      fill="none"
-      stroke={isInvalid ? invalidStroke : stroke}
-      strokeWidth={design.strokeW}
-      strokeLinecap={design.closed ? 'butt' : 'round'}
-      strokeLinejoin="round"
-    />
+    <g>
+      <path d={ribbon.bodyD} fill={fill} fillRule="evenodd" stroke="none" />
+      {ribbon.outerD && (
+        <path
+          d={ribbon.outerD}
+          fill="none"
+          stroke={curbColor}
+          strokeWidth={curbW}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      )}
+      {ribbon.innerD && (
+        <path
+          d={ribbon.innerD}
+          fill="none"
+          stroke={curbColor}
+          strokeWidth={curbW}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      )}
+      <path
+        d={ribbon.centerD}
+        fill="none"
+        stroke={centerColor}
+        strokeWidth={centerW}
+        strokeDasharray={dash}
+        strokeLinecap="butt"
+        strokeLinejoin="round"
+      />
+    </g>
   )
 }
 

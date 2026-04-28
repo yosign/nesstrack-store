@@ -31,11 +31,17 @@ export function parseDesign(input: unknown): TrackDesign {
   const anchors = obj.anchors.map((a, i) => {
     if (!a || typeof a !== 'object') throw new DesignParseError(`anchor[${i}] not object`)
     const ar = a as Record<string, unknown>
+    const w = ar.w
+    const rAuto = ar.rAuto
+    const wAuto = ar.wAuto
     return {
       id: String(ar.id ?? `a${i}`),
       x: num(ar.x, `anchor[${i}].x`),
       y: num(ar.y, `anchor[${i}].y`),
       r: num(ar.r, `anchor[${i}].r`),
+      ...(typeof w === 'number' && isFinite(w) ? { w } : {}),
+      ...(rAuto === true ? { rAuto: true as const } : {}),
+      ...(wAuto === true ? { wAuto: true as const } : {}),
     }
   })
   if (obj.closed && anchors.length < 3) throw new DesignParseError('closed needs ≥3 anchors')
