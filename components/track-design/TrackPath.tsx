@@ -19,10 +19,10 @@ export type TrackPathProps = {
 export function TrackPath({
   design,
   isInvalid = false,
-  bodyColor = '#3a3a3a',
+  bodyColor = '#5e6266',
   invalidColor = '#5a1f1f',
-  curbColor = 'rgba(255,255,255,0.85)',
-  centerColor = 'rgba(255,255,255,0.55)',
+  curbColor = 'rgba(255,255,255,0.95)',
+  centerColor = 'rgba(255,255,255,0.85)',
   interactive = false,
 }: TrackPathProps) {
   const ribbon = buildRibbon(design)
@@ -56,6 +56,53 @@ export function TrackPath({
           strokeLinecap="round"
         />
       )}
+      {ribbon.kerbs.map((k, i) => {
+        const kerbStripe = Math.max(0.04, ref * 0.35)
+        const kerbW = Math.max(0.012, ref * 0.18)
+        const baseColor = '#2196d3'
+        return (
+          <g key={`kerb-${i}`}>
+            <path
+              d={k.outerD}
+              fill="none"
+              stroke={baseColor}
+              strokeWidth={kerbW}
+              strokeLinecap="butt"
+              strokeLinejoin="miter"
+            />
+            <path
+              d={k.outerD}
+              fill="none"
+              stroke="#f5f5f5"
+              strokeWidth={kerbW}
+              strokeLinecap="butt"
+              strokeLinejoin="miter"
+              strokeDasharray={`${kerbStripe} ${kerbStripe}`}
+            />
+            {k.innerD && (
+              <>
+                <path
+                  d={k.innerD}
+                  fill="none"
+                  stroke={baseColor}
+                  strokeWidth={kerbW}
+                  strokeLinecap="butt"
+                  strokeLinejoin="miter"
+                />
+                <path
+                  d={k.innerD}
+                  fill="none"
+                  stroke="#f5f5f5"
+                  strokeWidth={kerbW}
+                  strokeLinecap="butt"
+                  strokeLinejoin="miter"
+                  strokeDasharray={`${kerbStripe} ${kerbStripe}`}
+                />
+              </>
+            )}
+          </g>
+        )
+      })}
       <path
         d={ribbon.centerD}
         fill="none"

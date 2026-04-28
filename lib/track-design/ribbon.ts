@@ -25,7 +25,10 @@ type TaggedSegment =
       a2: number
       sweep: 0 | 1
       w: number
+      isKerb: boolean
     }
+
+const KERB_R_THRESHOLD = 0.22
 
 export type CenterSample = {
   p: Vec2
@@ -33,6 +36,13 @@ export type CenterSample = {
   t: Vec2
   /** total width at this point (meters) */
   w: number
+  /** true when the sample is part of a fillet arc (used to mark kerbs) */
+  onArc?: boolean
+}
+
+export type KerbSegment = {
+  outerD: string
+  innerD: string
 }
 
 export type RibbonResult = {
@@ -48,6 +58,8 @@ export type RibbonResult = {
   innerD: string
   /** centerline path (raw fillet path) */
   centerD: string
+  /** per-arc kerb segments (outer + inner edge polylines for striped kerbs) */
+  kerbs: KerbSegment[]
 }
 
 const fmt = (n: number): string => {
@@ -106,6 +118,7 @@ function buildTaggedSegments(design: TrackDesign): TaggedSegment[] {
       a2,
       sweep: f.sweep,
       w: widths[i],
+      isKerb: f.r < KERB_R_THRESHOLD,
     }
   }
 
@@ -150,12 +163,13 @@ function buildTaggedSegments(design: TrackDesign): TaggedSegment[] {
 
 function sampleSegment(seg: TaggedSegment): CenterSample[] {
   const out: CenterSample[] = []
+  const onArc = seg.kind === 'arc' && seg.isKerb
   if (seg.kind === 'line') {
     const dx = seg.b.x - seg.a.x
     const dy = seg.b.y - seg.a.y
     const length = Math.hypot(dx, dy)
     if (length < 1e-9) {
-      out.push({ p: seg.a, t: { x: 1, y: 0 }, w: seg.w0 })
+      out.push({ p: seg.a, t: { x: 1, y: 0 }, w: seg.w0, onArc })
       return out
     }
     const tx = dx / length
@@ -168,6 +182,7 @@ function sampleSegment(seg: TaggedSegment): CenterSample[] {
         p: { x: seg.a.x + dx * u, y: seg.a.y + dy * u },
         t: { x: tx, y: ty },
         w: seg.w0 + (seg.w1 - seg.w0) * e,
+        onArc,
       })
     }
     return out
@@ -191,6 +206,7 @@ function sampleSegment(seg: TaggedSegment): CenterSample[] {
       },
       t: { x: -Math.sin(ang) * sign, y: Math.cos(ang) * sign },
       w: seg.w,
+      onArc,
     })
   }
   return out
@@ -209,13 +225,41 @@ function dedupedSamples(segments: TaggedSegment[]): CenterSample[] {
         if (dx * dx + dy * dy < epsSq) {
           last.w = (last.w + s.w) * 0.5
           last.t = s.t
+          last.onArc = last.onArc || s.onArc
           continue
         }
       }
-      samples.push({ p: { ...s.p }, t: { ...s.t }, w: s.w })
+      samples.push({ p: { ...s.p }, t: { ...s.t }, w: s.w, onArc: s.onArc })
     }
   }
   return samples
+}
+
+function buildKerbSegments(
+  samples: CenterSample[],
+  outer: Vec2[],
+  inner: Vec2[],
+): KerbSegment[] {
+  const segments: KerbSegment[] = []
+  let runStart = -1
+  for (let i = 0; i <= samples.length; i++) {
+    const isArc = i < samples.length && samples[i].onArc
+    if (isArc && runStart < 0) {
+      runStart = i
+    } else if (!isArc && runStart >= 0) {
+      const end = i
+      if (end - runStart >= 2) {
+        const oPts = outer.slice(runStart, end)
+        const iPts = inner.slice(runStart, end)
+        segments.push({
+          outerD: polylineD(oPts, false),
+          innerD: polylineD(iPts, false),
+        })
+      }
+      runStart = -1
+    }
+  }
+  return segments
 }
 
 function offsetEdges(samples: CenterSample[]): { outer: Vec2[]; inner: Vec2[] } {
@@ -313,6 +357,7 @@ export function buildRibbon(design: TrackDesign): RibbonResult | null {
   const bodyD = closed ? bodyClosedD(outer, inner) : bodyOpenD(outer, inner)
   const outerD = polylineD(outer, closed)
   const innerD = closed ? polylineD(inner, closed) : ''
+  const kerbs = buildKerbSegments(samples, outer, inner)
   return {
     samples,
     outer,
@@ -322,6 +367,7 @@ export function buildRibbon(design: TrackDesign): RibbonResult | null {
     outerD,
     innerD,
     centerD: centerD(samples, closed),
+    kerbs,
   }
 }
 
