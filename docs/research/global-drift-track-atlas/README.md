@@ -21,8 +21,9 @@ safety planning, manufacturing or survey work.
 - `public/images/global-drift-track-atlas/svg/`: exactly 50 editable 1600×1200 SVGs.
 - `public/images/global-drift-track-atlas/png/`: exactly 50 transparent 1600×1200 PNGs.
 - `public/images/global-drift-track-atlas/contact-sheet.{svg,png}`: 5×10 visual index.
-- `public/images/global-drift-track-atlas/original/`: 46 real venue satellite
-  views and 4 source-event frames for temporary venues without stable parcels.
+- `public/images/global-drift-track-atlas/original/`: exactly 50 real venue
+  satellite views. Temporary parcels are identified from cited event addresses
+  or venue records before imagery is generated.
 
 ## Evidence and confidence
 

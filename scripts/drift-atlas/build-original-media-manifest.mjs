@@ -37,6 +37,10 @@ const COORDINATE_OVERRIDES = {
   'mx-queretaro-autodromo-de-queretaro-mexican-drift-championship-2024': [20.585614, -100.328905, 'Autódromo de Querétaro'],
   'de-nurburg-nurburgring-mullenbachschleife-nurburgring-drift-cup-2026': [50.326639, 6.935083, 'Nürburgring Müllenbachschleife'],
   'za-port-shepstone-dezzi-raceway-supadrift-2016': [-30.7704, 30.4256, 'Dezzi Raceway'],
+  'it-prato-prato-event-car-park-campionato-italiano-drifting-2026': [43.8586707, 11.1235004, 'Ex parcheggio TIR, Viale Guglielmo Marconi, Prato'],
+  'my-kuala-lumpur-speed-city-kl-formula-drift-asia-2012': [3.0294634, 101.7176331, 'Speed City at The Mines / MIECC precinct'],
+  'th-bangkok-bangkok-temporary-drift-venue-formula-drift-asia-2012': [13.82118, 100.67732, 'Wonder World Special Venue, Ramintra, Bangkok'],
+  'cn-beijing-beijing-d1-special-venue-d1-grand-prix-china-2016': [40.09716, 116.64214, '北京亚袖汽车运动基地, Shunyi, Beijing'],
 }
 const EVENT_MEDIA_FALLBACKS = {
   'it-prato-prato-event-car-park-campionato-italiano-drifting-2026': {

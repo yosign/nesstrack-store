@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-17T10:42:41.000Z",
+  "generated_at": "2026-08-17T10:57:53.163Z",
   "policy": "Default gallery media must be a real venue aerial/satellite image or an official event aerial/map frame. Abstract redraws are secondary overlays only.",
   "tracks": [
     {
@@ -675,14 +675,18 @@
       "source_tier": "S",
       "location": {
         "query": "Prato event car park, Prato, Italy",
-        "precision": "unresolved"
+        "latitude": 43.8586707,
+        "longitude": 11.1235004,
+        "display_name": "Ex parcheggio TIR, Viale Guglielmo Marconi, Prato",
+        "result_type": "manual-primary-source-coordinate",
+        "precision": "venue"
       },
-      "media_type": "source-event-frame",
-      "media_label": "赛事来源画面",
-      "original_url": "https://i.ytimg.com/vi/typk96v-TKQ/hqdefault.jpg",
+      "media_type": "venue-aerial",
+      "media_label": "真实场地俯视图",
+      "original_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=11.1144858,43.8521707,11.1325150,43.8651707&bboxSR=4326&imageSR=4326&size=1200,900&format=jpg&f=image",
       "local_path": "/images/global-drift-track-atlas/original/it-prato-prato-event-car-park-campionato-italiano-drifting-2026.jpg",
-      "aerial_url": null,
-      "attribution": "Campionato Italiano Drifting Drift Italy",
+      "aerial_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=11.1144858,43.8521707,11.1325150,43.8651707&bboxSR=4326&imageSR=4326&size=1200,900&format=jpg&f=image",
+      "attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
       "aerial_attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
       "media_status": "original-media-ready"
     },
@@ -942,14 +946,18 @@
       "source_tier": "B",
       "location": {
         "query": "Speed City KL, Kuala Lumpur, Malaysia",
-        "precision": "unresolved"
+        "latitude": 3.0294634,
+        "longitude": 101.7176331,
+        "display_name": "Speed City at The Mines / MIECC precinct",
+        "result_type": "manual-primary-source-coordinate",
+        "precision": "venue"
       },
-      "media_type": "source-event-frame",
-      "media_label": "赛事来源画面",
-      "original_url": "https://i.ytimg.com/vi/Kfi4f_bOAqU/hqdefault.jpg",
+      "media_type": "venue-aerial",
+      "media_label": "真实场地俯视图",
+      "original_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=101.7056163,3.0174634,101.7296499,3.0414634&bboxSR=4326&imageSR=4326&size=1200,900&format=jpg&f=image",
       "local_path": "/images/global-drift-track-atlas/original/my-kuala-lumpur-speed-city-kl-formula-drift-asia-2012.jpg",
-      "aerial_url": null,
-      "attribution": "wesimplifymarketing",
+      "aerial_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=101.7056163,3.0174634,101.7296499,3.0414634&bboxSR=4326&imageSR=4326&size=1200,900&format=jpg&f=image",
+      "attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
       "aerial_attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
       "media_status": "original-media-ready"
     },
@@ -961,14 +969,18 @@
       "source_tier": "B",
       "location": {
         "query": "Bangkok temporary drift venue, Bangkok, Thailand",
-        "precision": "unresolved"
+        "latitude": 13.82118,
+        "longitude": 100.67732,
+        "display_name": "Wonder World Special Venue, Ramintra, Bangkok",
+        "result_type": "manual-primary-source-coordinate",
+        "precision": "venue"
       },
-      "media_type": "source-event-frame",
-      "media_label": "赛事来源画面",
-      "original_url": "https://i.ytimg.com/vi/5hY23ZyKQIc/hqdefault.jpg",
+      "media_type": "venue-aerial",
+      "media_label": "真实场地俯视图",
+      "original_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=100.6706262,13.8146800,100.6840138,13.8276800&bboxSR=4326&imageSR=4326&size=1200,900&format=jpg&f=image",
       "local_path": "/images/global-drift-track-atlas/original/th-bangkok-bangkok-temporary-drift-venue-formula-drift-asia-2012.jpg",
-      "aerial_url": null,
-      "attribution": "Alan Viscardi",
+      "aerial_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=100.6706262,13.8146800,100.6840138,13.8276800&bboxSR=4326&imageSR=4326&size=1200,900&format=jpg&f=image",
+      "attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
       "aerial_attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
       "media_status": "original-media-ready"
     },
@@ -1005,14 +1017,18 @@
       "source_tier": "A",
       "location": {
         "query": "Beijing D1 Special Venue, Beijing, China",
-        "precision": "unresolved"
+        "latitude": 40.09716,
+        "longitude": 116.64214,
+        "display_name": "北京亚袖汽车运动基地, Shunyi, Beijing",
+        "result_type": "manual-primary-source-coordinate",
+        "precision": "venue"
       },
-      "media_type": "source-event-frame",
-      "media_label": "赛事来源画面",
-      "original_url": "https://i.ytimg.com/vi/wLvxZJlic4w/hqdefault.jpg",
+      "media_type": "venue-aerial",
+      "media_label": "真实场地俯视图",
+      "original_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=116.6336427,40.0906600,116.6506373,40.1036600&bboxSR=4326&imageSR=4326&size=1200,900&format=jpg&f=image",
       "local_path": "/images/global-drift-track-atlas/original/cn-beijing-beijing-d1-special-venue-d1-grand-prix-china-2016.jpg",
-      "aerial_url": null,
-      "attribution": "Tetsuya Hibino driver channel",
+      "aerial_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=116.6336427,40.0906600,116.6506373,40.1036600&bboxSR=4326&imageSR=4326&size=1200,900&format=jpg&f=image",
+      "attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
       "aerial_attribution": "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
       "media_status": "original-media-ready"
     },

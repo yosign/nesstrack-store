@@ -275,7 +275,7 @@ export default function DriftAtlasClient({ tracks }: Props) {
         <div className={styles.heroCopy}>
           <p className={styles.kicker}><Sparkles size={15} />Worldwide course research · Vol. 01</p>
           <h1>漂移赛道<br /><span>真实图鉴</span></h1>
-          <p>50 条真实场地卫星 / 航拍与赛事原始画面，跨越 29 个国家和地区。默认看原图，需要时再切换独立的路线标注层。</p>
+          <p>50 条真实场地卫星 / 航拍俯视图，跨越 29 个国家和地区。默认看原图，需要时再切换独立的路线标注层。</p>
         </div>
 
         <div className={styles.heroStats}>

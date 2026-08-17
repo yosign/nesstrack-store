@@ -5,7 +5,7 @@ import DriftAtlasClient, { type AtlasTrack } from './DriftAtlasClient'
 
 export const metadata: Metadata = {
   title: 'Global Drift Atlas — 50 Real Track Views | NessRC',
-  description: '全球 50 条知名漂移赛事赛道的真实卫星、航拍与赛事原始画面档案，覆盖 29 个国家和地区。',
+  description: '全球 50 条知名漂移赛事赛道的真实卫星与航拍俯视图档案，覆盖 29 个国家和地区。',
 }
 
 export default function DriftAtlasPage() {
