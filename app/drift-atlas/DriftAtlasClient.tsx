@@ -3,63 +3,19 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import {
-  ArrowDownToLine,
-  ArrowLeft,
-  ArrowUpRight,
-  Check,
-  ChevronRight,
-  CircleX,
-  Compass,
-  Flag,
-  Gauge,
-  Map,
-  MapPin,
-  Search,
-  Sparkles,
-  X,
-} from 'lucide-react'
+import { ArrowLeft, CircleX, Search, X } from 'lucide-react'
 import styles from './drift-atlas.module.css'
-
-type Source = {
-  id: string
-  scope: string
-  tier: string
-  title: string
-  publisher: string
-  url: string
-}
 
 export type AtlasTrack = {
   id: string
-  name: string
-  event: string
-  series: string
-  year: number
   venue: string
   city: string
   country: string
   countryCode: string
   region: string
-  tier: string
-  venueType: string
-  confidence: string
-  direction: string
-  segment: string
-  start: string
-  finish: string
-  initiation: string
-  features: string
-  tags: string[]
-  score: number
-  evidenceStatus: string
+  year: number
   originalImage: string | null
-  mediaType: string
-  mediaLabel: string
   mediaAttribution: string
-  mediaSourceUrl: string | null
-  mediaStatus: string
-  sources: Source[]
 }
 
 type Props = { tracks: AtlasTrack[] }
@@ -75,64 +31,32 @@ const REGION_LABELS: Record<string, string> = {
   'middle-east-africa': '中东与非洲',
 }
 
-const TIER_LABELS: Record<string, string> = {
-  international: '国际 / 洲际',
-  national: '国家级',
-  historic: '历史 / 邀请赛',
-}
-
-const CONFIDENCE_LABELS: Record<string, string> = {
-  highest: '官方路线图',
-  high: '高置信度',
-  medium: '编辑重建',
-}
-
-const EVIDENCE_LABELS: Record<string, string> = {
-  'source-threshold-met': '路线已核验',
-  'event-venue-confirmed': '赛事场地已核验',
-}
-
 const imageBase = '/images/global-drift-track-atlas'
 
-function AtlasMark() {
+function TrackImage({ track, viewMode, modal = false }: { track: AtlasTrack; viewMode: ViewMode; modal?: boolean }) {
+  const isOriginal = viewMode === 'original' && track.originalImage
   return (
-    <span className={styles.mark} aria-hidden="true">
-      <span>Ｎ</span>
-      <i />
-    </span>
+    <Image
+      src={isOriginal ? track.originalImage! : `${imageBase}/png/${track.id}.png`}
+      alt={`${track.venue} ${isOriginal ? '真实场地俯视图' : '路线参考图'}`}
+      width={1600}
+      height={1200}
+      sizes={modal ? '100vw' : '(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw'}
+      className={`${styles.trackImage} ${isOriginal ? styles.originalImage : styles.routeImage}`}
+      priority={modal}
+      unoptimized={Boolean(isOriginal)}
+    />
   )
 }
 
 function TrackCard({ track, index, viewMode, onOpen }: { track: AtlasTrack; index: number; viewMode: ViewMode; onOpen: () => void }) {
-  const isOriginal = viewMode === 'original' && track.originalImage
   return (
     <button className={styles.card} onClick={onOpen} type="button">
-      <span className={styles.cardTopline}>
-        <span>{String(index + 1).padStart(3, '0')}</span>
-        <span>{track.countryCode} / {track.year}</span>
-      </span>
-      <span className={styles.trackStage}>
-        <Image
-          src={isOriginal ? track.originalImage! : `${imageBase}/png/${track.id}.png`}
-          alt={isOriginal ? `${track.venue} 真实场地俯视原图` : `${track.name} 路线参考图`}
-          width={1600}
-          height={1200}
-          sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
-          className={`${styles.trackImage} ${isOriginal ? styles.originalImage : styles.routeImage}`}
-          unoptimized={Boolean(isOriginal)}
-        />
-        <span className={styles.mediaBadge} data-media={track.mediaType}>{isOriginal ? track.mediaLabel : '路线参考层'}</span>
-        {isOriginal && <span className={styles.imageCredit}>{track.mediaAttribution}</span>}
-        <span className={styles.cardOpen}><ArrowUpRight size={16} /></span>
-      </span>
+      <span className={styles.trackStage}><TrackImage track={track} viewMode={viewMode} /></span>
       <span className={styles.cardBody}>
-        <span className={styles.cardSeries}>{track.series}</span>
+        <span className={styles.cardIndex}>{String(index + 1).padStart(3, '0')}</span>
         <strong>{track.venue}</strong>
-        <span className={styles.cardPlace}><MapPin size={13} />{track.city} · {track.country}</span>
-      </span>
-      <span className={styles.cardFooter}>
-        <span data-evidence={track.evidenceStatus}>{EVIDENCE_LABELS[track.evidenceStatus]}</span>
-        <ChevronRight size={16} />
+        <span>{track.city} · {track.country} · {track.year}</span>
       </span>
     </button>
   )
@@ -140,6 +64,7 @@ function TrackCard({ track, index, viewMode, onOpen }: { track: AtlasTrack; inde
 
 function TrackModal({ track, onClose }: { track: AtlasTrack; onClose: () => void }) {
   const [viewMode, setViewMode] = useState<ViewMode>('original')
+
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -151,87 +76,23 @@ function TrackModal({ track, onClose }: { track: AtlasTrack; onClose: () => void
     }
   }, [onClose])
 
-  const courseSources = track.sources.filter((source) => source.scope === 'course')
-  const isOriginal = viewMode === 'original' && track.originalImage
-
   return (
     <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="track-dialog-title">
-        <button className={styles.modalClose} type="button" onClick={onClose} aria-label="关闭详情">
-          <X size={22} />
-        </button>
-
-        <div className={styles.modalVisual}>
-          <div className={styles.modalIndex}>{track.countryCode}<br /><span>{track.year}</span></div>
-          <Image
-            src={isOriginal ? track.originalImage! : `${imageBase}/png/${track.id}.png`}
-            alt={isOriginal ? `${track.venue} 真实场地俯视原图` : `${track.name} 路线参考大图`}
-            width={1600}
-            height={1200}
-            sizes="(max-width: 900px) 100vw, 58vw"
-            className={`${styles.modalImage} ${isOriginal ? styles.modalOriginalImage : styles.modalRouteImage}`}
-            priority
-            unoptimized={Boolean(isOriginal)}
-          />
-          <div className={styles.modalViewToggle} aria-label="图片类型">
-            <button className={viewMode === 'original' ? styles.activeView : ''} onClick={() => setViewMode('original')} type="button">真实原图</button>
+        <TrackImage track={track} viewMode={viewMode} modal />
+        <div className={styles.modalTop}>
+          <div className={styles.viewToggle} aria-label="图片类型">
+            <button className={viewMode === 'original' ? styles.activeView : ''} onClick={() => setViewMode('original')} type="button">原图</button>
             <button className={viewMode === 'route' ? styles.activeView : ''} onClick={() => setViewMode('route')} type="button">路线参考</button>
           </div>
-          <div className={styles.modalMediaMeta}>
-            <b>{isOriginal ? track.mediaLabel : '编辑路线参考层'}</b>
-            {isOriginal && <span>{track.mediaAttribution}</span>}
-          </div>
-          {!isOriginal && <div className={styles.legend}>
-            <span><i className={styles.startDot} />起点</span>
-            <span><i className={styles.finishDot} />终点</span>
-            <span><i className={styles.outerDot} />外区</span>
-            <span><i className={styles.innerDot} />内区</span>
-          </div>}
+          <button className={styles.modalClose} type="button" onClick={onClose} aria-label="关闭详情"><X size={21} /></button>
         </div>
-
-        <div className={styles.modalContent}>
-          <p className={styles.eyebrow}>{track.series} · {TIER_LABELS[track.tier]}</p>
-          <h2 id="track-dialog-title">{track.venue}</h2>
-          <p className={styles.modalLocation}><MapPin size={15} />{track.city}, {track.country} · {track.year}</p>
-
-          <div className={styles.modalBadges}>
-            <span>{track.mediaLabel}</span>
-            <span data-evidence={track.evidenceStatus}>{EVIDENCE_LABELS[track.evidenceStatus]}</span>
-            <span data-confidence={track.confidence}>{CONFIDENCE_LABELS[track.confidence]}</span>
-            <span>{track.venueType}</span>
-            <span>评分 {track.score}</span>
+        <div className={styles.modalCaption}>
+          <div>
+            <h2 id="track-dialog-title">{track.venue}</h2>
+            <p>{track.city} · {track.country} · {track.year}</p>
           </div>
-
-          <div className={styles.factList}>
-            <div><Compass size={17} /><span><b>路线</b>{track.segment}</span></div>
-            <div><Gauge size={17} /><span><b>方向</b>{track.direction}</span></div>
-            <div><Flag size={17} /><span><b>起终点</b>{track.start} → {track.finish}</span></div>
-          </div>
-
-          {courseSources.length > 0 && (
-            <div className={styles.sources}>
-              <p>路线证据</p>
-              {courseSources.map((source) => (
-                <a key={source.id} href={source.url} target="_blank" rel="noreferrer">
-                  <span><b>{source.tier}</b>{source.title}<small>{source.publisher}</small></span>
-                  <ArrowUpRight size={16} />
-                </a>
-              ))}
-            </div>
-          )}
-
-          {track.mediaSourceUrl && (
-            <a className={styles.originalSource} href={track.mediaSourceUrl} target="_blank" rel="noreferrer">
-              查看这张原图对应的赛事来源 <ArrowUpRight size={16} />
-            </a>
-          )}
-
-          <div className={styles.downloads}>
-            <a href={`${imageBase}/svg/${track.id}.svg`} download><ArrowDownToLine size={17} />路线参考 SVG</a>
-            <a href={`${imageBase}/png/${track.id}.png`} download><ArrowDownToLine size={17} />路线参考 PNG</a>
-          </div>
-
-          <p className={styles.disclaimer}>真实场地影像用于识别赛道环境；路线参考是独立编辑层，不代表卫星拍摄当日的赛事布置，也不作为工程测绘依据。历史或临时场地在当前影像中可能已改变。</p>
+          {viewMode === 'original' && <small>{track.mediaAttribution}</small>}
         </div>
       </section>
     </div>
@@ -241,8 +102,6 @@ function TrackModal({ track, onClose }: { track: AtlasTrack; onClose: () => void
 export default function DriftAtlasClient({ tracks }: Props) {
   const [query, setQuery] = useState('')
   const [region, setRegion] = useState('all')
-  const [tier, setTier] = useState('all')
-  const [confidence, setConfidence] = useState('all')
   const [viewMode, setViewMode] = useState<ViewMode>('original')
   const [selectedTrack, setSelectedTrack] = useState<AtlasTrack | null>(null)
 
@@ -251,99 +110,51 @@ export default function DriftAtlasClient({ tracks }: Props) {
     return counts
   }, {}), [tracks])
 
-  const atlasStats = useMemo(() => ({
-    countries: new Set(tracks.map((track) => track.countryCode)).size,
-    venues: new Set(tracks.map((track) => track.venue)).size,
-    regions: new Set(tracks.map((track) => track.region)).size,
-    sources: new Set(tracks.flatMap((track) => track.sources.map((source) => source.id))).size,
-  }), [tracks])
-
   const filteredTracks = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase()
     return tracks.filter((track) => {
-      const matchesQuery = !needle || [track.name, track.venue, track.city, track.country, track.series]
+      const matchesQuery = !needle || [track.venue, track.city, track.country]
         .some((value) => value.toLocaleLowerCase().includes(needle))
-      return matchesQuery
-        && (region === 'all' || track.region === region)
-        && (tier === 'all' || track.tier === tier)
-        && (confidence === 'all' || track.confidence === confidence)
+      return matchesQuery && (region === 'all' || track.region === region)
     })
-  }, [tracks, query, region, tier, confidence])
+  }, [tracks, query, region])
 
   const resetFilters = () => {
     setQuery('')
     setRegion('all')
-    setTier('all')
-    setConfidence('all')
   }
 
   return (
     <main className={styles.page}>
-      <div className={styles.gridTexture} aria-hidden="true" />
-
       <header className={styles.header}>
-        <Link href="/" className={styles.brand}><AtlasMark /><span>NESS<em>RC</em></span></Link>
-        <div className={styles.headerTitle}><span>Global Drift Archive</span><i />全球漂移赛道原图档案</div>
+        <Link href="/" className={styles.brand}>NESS<span>RC</span></Link>
         <Link href="/" className={styles.back}><ArrowLeft size={16} />返回商店</Link>
       </header>
 
       <section className={styles.hero}>
-        <div className={styles.heroCopy}>
-          <p className={styles.kicker}><Sparkles size={15} />Worldwide course research · Vol. 01</p>
-          <h1>漂移赛道<br /><span>真实图鉴</span></h1>
-          <p>{tracks.length} 条真实场地卫星 / 航拍俯视图，覆盖 {atlasStats.countries} 个国家和地区。默认看原图，需要时再切换独立的路线参考层。</p>
-        </div>
-
-        <div className={styles.heroStats}>
-          <div className={styles.heroNumber}>{tracks.length}</div>
-          <div className={styles.statGrid}>
-            <div><strong>{atlasStats.countries}</strong><span>国家 / 地区</span></div>
-            <div><strong>{atlasStats.venues}</strong><span>赛事场地</span></div>
-            <div><strong>{atlasStats.regions}</strong><span>全球区域</span></div>
-            <div><strong>{atlasStats.sources}</strong><span>证据记录</span></div>
-          </div>
-          <div className={styles.signal}><i /><span>Atlas online</span><b>2026.08</b></div>
-        </div>
+        <h1><span>100 条</span> <span>漂移赛道</span></h1>
+        <p>全球赛事场地卫星与航拍俯视图</p>
       </section>
 
       <section className={styles.atlas}>
-        <div className={styles.filterRail}>
+        <div className={styles.filters}>
           <div className={styles.searchBox}>
-            <Search size={18} />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索赛道、城市、赛事…" aria-label="搜索赛道" />
+            <Search size={17} />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索赛道或地点" aria-label="搜索赛道" />
             {query && <button onClick={() => setQuery('')} type="button" aria-label="清除搜索"><CircleX size={16} /></button>}
           </div>
-
-          <div className={styles.filterGroup}>
-            <span>地区</span>
-            <div>
-              <button className={region === 'all' ? styles.activeFilter : ''} onClick={() => setRegion('all')} type="button">全部 <b>{tracks.length}</b></button>
-              {Object.entries(REGION_LABELS).map(([value, label]) => (
-                <button className={region === value ? styles.activeFilter : ''} onClick={() => setRegion(value)} type="button" key={value}>{label} <b>{regionCounts[value]}</b></button>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.selectRow}>
-            <label>赛事级别
-              <select value={tier} onChange={(event) => setTier(event.target.value)}>
-                <option value="all">全部级别</option>
-                {Object.entries(TIER_LABELS).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-              </select>
-            </label>
-            <label>路线资料
-              <select value={confidence} onChange={(event) => setConfidence(event.target.value)}>
-                <option value="all">全部置信度</option>
-                {Object.entries(CONFIDENCE_LABELS).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-              </select>
-            </label>
+          <div className={styles.regions}>
+            <button className={region === 'all' ? styles.activeFilter : ''} onClick={() => setRegion('all')} type="button">全部 {tracks.length}</button>
+            {Object.entries(REGION_LABELS).map(([value, label]) => (
+              <button className={region === value ? styles.activeFilter : ''} onClick={() => setRegion(value)} type="button" key={value}>{label} {regionCounts[value]}</button>
+            ))}
           </div>
         </div>
 
         <div className={styles.galleryHead}>
-          <div><Map size={18} /><span>当前显示</span><strong>{filteredTracks.length}</strong><span>/ {tracks.length} 条路线</span></div>
+          <span>{filteredTracks.length} 条</span>
           <div className={styles.viewToggle} aria-label="图库图片类型">
-            <button className={viewMode === 'original' ? styles.activeView : ''} onClick={() => setViewMode('original')} type="button">真实原图</button>
+            <button className={viewMode === 'original' ? styles.activeView : ''} onClick={() => setViewMode('original')} type="button">原图</button>
             <button className={viewMode === 'route' ? styles.activeView : ''} onClick={() => setViewMode('route')} type="button">路线参考</button>
           </div>
         </div>
@@ -356,19 +167,11 @@ export default function DriftAtlasClient({ tracks }: Props) {
           </div>
         ) : (
           <div className={styles.empty}>
-            <Compass size={38} />
-            <strong>没有找到匹配路线</strong>
-            <span>换一个关键词，或者清空筛选条件。</span>
-            <button onClick={resetFilters} type="button"><Check size={16} />重置筛选</button>
+            <span>没有找到赛道</span>
+            <button onClick={resetFilters} type="button">清空筛选</button>
           </div>
         )}
       </section>
-
-      <footer className={styles.footer}>
-        <div><AtlasMark /><strong>NessRC Drift Atlas</strong></div>
-        <p>Real venue imagery · Optional editorial route overlays</p>
-        <span>原图来源与影像署名均在详情页显示。</span>
-      </footer>
 
       {selectedTrack && <TrackModal track={selectedTrack} onClose={() => setSelectedTrack(null)} />}
     </main>
