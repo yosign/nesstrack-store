@@ -30,7 +30,7 @@ const QUERY_OVERRIDES = {
   'za-port-shepstone-dezzi-raceway-supadrift-2016': 'Dezzi South Coast Raceway, Port Shepstone, South Africa',
 }
 const COORDINATE_OVERRIDES = {
-  'jp-maibara-okuibuki-motor-park-d1gp-2024': [35.5217394, 136.3885555, 'Grand Snow Okuibuki / Okuibuki Motor Park'],
+  'jp-maibara-okuibuki-motor-park-d1gp-2024': [35.521111, 136.383056, 'Okuibuki Motor Park — Parking Area 4 precinct'],
   'jp-suzuka-suzuka-twin-circuit-formula-drift-japan-2024': [34.801667, 136.493056, 'Suzuka Twin Circuit'],
   'us-braselton-michelin-raceway-road-atlanta-formula-drift-2026': [34.146667, -83.817778, 'Michelin Raceway Road Atlanta'],
   'us-stafford-springs-stafford-motor-speedway-formula-drift-2026': [41.95709, -72.32137, 'Stafford Motor Speedway'],
@@ -41,6 +41,32 @@ const COORDINATE_OVERRIDES = {
   'my-kuala-lumpur-speed-city-kl-formula-drift-asia-2012': [3.0294634, 101.7176331, 'Speed City at The Mines / MIECC precinct'],
   'th-bangkok-bangkok-temporary-drift-venue-formula-drift-asia-2012': [13.82118, 100.67732, 'Wonder World Special Venue, Ramintra, Bangkok'],
   'cn-beijing-beijing-d1-special-venue-d1-grand-prix-china-2016': [40.09716, 116.64214, '北京亚袖汽车运动基地, Shunyi, Beijing'],
+  'jp-maibara-okuibuki-motor-park-formula-drift-japan-2024': [35.521111, 136.383056, 'Okuibuki Motor Park — Parking Area 4 precinct'],
+  'eg-cairo-cairo-festival-city-event-site-red-bull-car-park-drift-2021': [30.0281356, 31.4076706, 'Cairo Festival City event precinct'],
+  'se-fallfors-drivecenter-arena-drift-masters-2023': [65.1140278, 20.75725, 'Drivecenter Arena'],
+  'br-piracicaba-ecpa-ultimate-drift-2023': [-22.73907, -47.53248, 'Esporte Clube Piracicabano de Automobilismo'],
+  'ca-mirabel-icar-route-66-dmcc-2024': [45.6802937, -74.0233092, 'Circuit ICAR'],
+  'th-bangkok-d1-thailand-temporary-venue-d1-grand-prix-thailand-2012': [13.82118, 100.67732, 'Wonder World Special Venue, Ramintra, Bangkok'],
+  'gb-lochgelly-driftland-drift-league-gb-2024': [56.1274, -3.2795, 'Driftland, Lochgelly Motorsports Complex'],
+  'ph-manila-quirino-grandstand-event-site-formula-drift-asia-2011': [14.5795523, 120.9744064, 'Quirino Grandstand event precinct'],
+  'jp-kasai-central-circuit-d1-lights-2021': [35.0258032, 134.9222408, 'Central Circuit'],
+  'ca-montreal-circuit-icar-formula-drift-canada-2015': [45.6802937, -74.0233092, 'Circuit ICAR'],
+  'mx-monterrey-autodromo-monterrey-mexican-drift-championship-2023': [25.8529333, -100.2179499, 'Autódromo Monterrey'],
+  'gb-lydden-hill-lydden-hill-race-circuit-king-of-europe-drift-2016': [51.1782173, 1.1988257, 'Lydden Hill Race Circuit'],
+  'au-mallala-mallala-motorsport-park-drift-allstars-australia-2023': [-34.41439, 138.50535, 'Mallala Motorsport Park'],
+  'eg-cairo-cairo-festival-city-event-site-red-bull-car-park-drift-2024': [30.0281356, 31.4076706, 'Cairo Festival City event precinct'],
+  'mz-maputo-automovel-e-touring-clube-de-moc-campeonato-nacional-de-drift-2023': [-25.93974, 32.62226, 'Automóvel & Touring Clube de Moçambique'],
+  'jp-yamazoe-meihan-sportsland-d1gp-2005': [34.6344184, 135.9956669, 'Meihan Sportsland'],
+  'jp-niimi-bihoku-highland-circuit-d1gp-2002': [34.9761161, 133.6127482, 'Bihoku Highland Circuit'],
+  'jp-obihiro-tokachi-speedway-d1gp-2018': [42.63006, 143.2903561, 'Tokachi Speedway'],
+  'jp-omuta-sekia-hills-d1gp-2002': [33.0597742, 130.5116882, 'Sekia Hills DEC Circuit precinct'],
+  'us-englishtown-old-bridge-township-raceway-park-formula-drift-2025': [40.33633, -74.35057, 'Old Bridge Township Raceway Park'],
+  'us-miami-gardens-dolphin-stadium-d1-grand-prix-2006': [25.9579032, -80.2388497, 'Hard Rock Stadium'],
+  'us-chicago-soldier-field-formula-drift-2005': [41.8623356, -87.6176477, 'Soldier Field South Lot'],
+  'ee-laitse-laitse-rallypark-estonian-drift-2019': [59.174168, 24.366112, 'Laitse RallyPark'],
+  'au-benalla-winton-motor-raceway-hi-tec-drift-allstars-2024': [-36.5184805, 146.08718, 'Winton Motor Raceway'],
+  'qa-doha-qatar-racing-club-red-bull-car-park-drift-2018': [25.176657, 51.481572, 'Qatar Racing Club'],
+  'bh-sakhir-bahrain-international-circuit-drift-2024': [26.0311459, 50.5143663, 'Bahrain International Circuit'],
 }
 const EVENT_MEDIA_FALLBACKS = {
   'it-prato-prato-event-car-park-campionato-italiano-drifting-2026': {
@@ -77,7 +103,7 @@ function queryFor(track) {
 function aerialUrl(latitude, longitude, venueType) {
   const lat = Number(latitude)
   const lon = Number(longitude)
-  const span = ['parking', 'street', 'stadium'].includes(venueType) ? 0.0065 : 0.012
+  const span = ['parking', 'street', 'stadium'].includes(venueType) ? 0.0032 : 0.005
   const lonSpan = span / Math.max(Math.cos(lat * Math.PI / 180), 0.35)
   const bbox = [lon - lonSpan, lat - span, lon + lonSpan, lat + span].map((value) => value.toFixed(7)).join(',')
   return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${bbox}&bboxSR=4326&imageSR=4326&size=1200,900&format=jpg&f=image`
@@ -124,7 +150,9 @@ async function main() {
 
   for (const [index, track] of atlas.tracks.entries()) {
     const cached = previousById.get(track.track_id)
-    let location = cached?.location
+    let location = COORDINATE_OVERRIDES[track.track_id]
+      ? await geocode(track)
+      : cached?.location
     if (!location || location.precision === 'unresolved') {
       location = await geocode(track)
       if (index < atlas.tracks.length - 1) await delay(1100)
@@ -153,7 +181,7 @@ async function main() {
       aerial_attribution: 'Esri, Maxar, Earthstar Geographics, and the GIS User Community',
       media_status: originalUrl ? 'original-media-ready' : 'needs-event-frame',
     })
-    console.log(`${String(index + 1).padStart(2, '0')}/50 ${track.track_id}: ${location.precision}`)
+    console.log(`${String(index + 1).padStart(3, '0')}/${atlas.tracks.length} ${track.track_id}: ${location.precision}`)
   }
 
   await writeFile(OUTPUT, `${JSON.stringify({

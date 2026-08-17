@@ -10,17 +10,21 @@ const OUTPUT_DIR = path.join(ROOT, 'public/images/global-drift-track-atlas/origi
 async function main() {
   const manifest = JSON.parse(await readFile(MANIFEST, 'utf8'))
   await mkdir(OUTPUT_DIR, { recursive: true })
-
+  const force = process.argv.includes('--force')
   let completed = 0
-  for (const track of manifest.tracks) {
-    if (!track.original_url || !track.local_path) continue
+  const tracks = manifest.tracks.filter((track) => track.original_url && track.local_path)
+
+  async function download(track) {
+    if (!track.original_url || !track.local_path) return
     const output = path.join(ROOT, 'public', track.local_path.replace(/^\//, '').replace(/^images\//, 'images/'))
-    try {
-      await access(output)
-      completed += 1
-      console.log(`${String(completed).padStart(2, '0')}/50 ${track.track_id} cached`)
-      continue
-    } catch {}
+    if (!force) {
+      try {
+        await access(output)
+        completed += 1
+        console.log(`${String(completed).padStart(3, '0')}/${tracks.length} ${track.track_id} cached`)
+        return
+      } catch {}
+    }
     let response
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       try {
@@ -36,8 +40,17 @@ async function main() {
     const bytes = Buffer.from(await response.arrayBuffer())
     await writeFile(output, bytes)
     completed += 1
-    console.log(`${String(completed).padStart(2, '0')}/50 ${track.track_id} ${Math.round(bytes.length / 1024)}KB`)
+    console.log(`${String(completed).padStart(3, '0')}/${tracks.length} ${track.track_id} ${Math.round(bytes.length / 1024)}KB`)
   }
+
+  const queue = [...tracks]
+  const workers = Array.from({ length: Math.min(6, queue.length) }, async () => {
+    while (queue.length > 0) {
+      const track = queue.shift()
+      if (track) await download(track)
+    }
+  })
+  await Promise.all(workers)
 
   console.log(`Downloaded ${completed} original-media images.`)
 }

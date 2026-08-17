@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-08-17T09:51:06.548Z",
+  "checked_at": "2026-08-17T11:44:36.367Z",
   "errors": [],
   "warnings": [],
   "tracks": [
@@ -201,6 +201,206 @@
     },
     {
       "track_id": "za-port-shepstone-dezzi-raceway-supadrift-2016",
+      "errors": []
+    },
+    {
+      "track_id": "jp-maibara-okuibuki-motor-park-formula-drift-japan-2024",
+      "errors": []
+    },
+    {
+      "track_id": "us-grantsville-utah-motorsports-campus-formula-drift-2025",
+      "errors": []
+    },
+    {
+      "track_id": "de-grafenhainichen-ferropolis-drift-masters-2023",
+      "errors": []
+    },
+    {
+      "track_id": "eg-cairo-cairo-festival-city-event-site-red-bull-car-park-drift-2021",
+      "errors": []
+    },
+    {
+      "track_id": "gb-middlesbrough-teesside-autodrome-drift-league-gb-2026",
+      "errors": []
+    },
+    {
+      "track_id": "us-jupiter-palm-beach-international-raceway-formula-drift-2013",
+      "errors": []
+    },
+    {
+      "track_id": "se-fallfors-drivecenter-arena-drift-masters-2023",
+      "errors": []
+    },
+    {
+      "track_id": "br-piracicaba-ecpa-ultimate-drift-2023",
+      "errors": []
+    },
+    {
+      "track_id": "ca-mirabel-icar-route-66-dmcc-2024",
+      "errors": []
+    },
+    {
+      "track_id": "jp-oyama-fuji-speedway-d1gp-2016",
+      "errors": []
+    },
+    {
+      "track_id": "th-bangkok-d1-thailand-temporary-venue-d1-grand-prix-thailand-2012",
+      "errors": []
+    },
+    {
+      "track_id": "gb-lochgelly-driftland-drift-league-gb-2024",
+      "errors": []
+    },
+    {
+      "track_id": "jp-murata-sportsland-sugo-d1gp-2006",
+      "errors": []
+    },
+    {
+      "track_id": "ph-manila-quirino-grandstand-event-site-formula-drift-asia-2011",
+      "errors": []
+    },
+    {
+      "track_id": "pl-warsaw-pge-narodowy-drift-masters-2024",
+      "errors": []
+    },
+    {
+      "track_id": "jp-utsunomiya-nikko-circuit-d1-lights-2024",
+      "errors": []
+    },
+    {
+      "track_id": "jp-mobara-mobara-twin-circuit-d1-divisional-2024",
+      "errors": []
+    },
+    {
+      "track_id": "jp-kasai-central-circuit-d1-lights-2021",
+      "errors": []
+    },
+    {
+      "track_id": "us-sonoma-sonoma-raceway-formula-drift-2010",
+      "errors": []
+    },
+    {
+      "track_id": "us-wall-township-wall-stadium-speedway-formula-drift-2018",
+      "errors": []
+    },
+    {
+      "track_id": "ca-vallee-jonction-autodrome-chaudiere-dmcc-2023",
+      "errors": []
+    },
+    {
+      "track_id": "ca-montreal-circuit-icar-formula-drift-canada-2015",
+      "errors": []
+    },
+    {
+      "track_id": "mx-monterrey-autodromo-monterrey-mexican-drift-championship-2023",
+      "errors": []
+    },
+    {
+      "track_id": "cz-brno-automotodrom-brno-czech-drift-series-2024",
+      "errors": []
+    },
+    {
+      "track_id": "pl-poznan-tor-poznan-drift-open-2024",
+      "errors": []
+    },
+    {
+      "track_id": "gb-lydden-hill-lydden-hill-race-circuit-king-of-europe-drift-2016",
+      "errors": []
+    },
+    {
+      "track_id": "au-mallala-mallala-motorsport-park-drift-allstars-australia-2023",
+      "errors": []
+    },
+    {
+      "track_id": "in-coimbatore-kari-motor-speedway-indian-drift-challenge-2023",
+      "errors": []
+    },
+    {
+      "track_id": "pe-lima-autodromo-la-chutana-prodrift-peru-2023",
+      "errors": []
+    },
+    {
+      "track_id": "eg-cairo-cairo-festival-city-event-site-red-bull-car-park-drift-2024",
+      "errors": []
+    },
+    {
+      "track_id": "mz-maputo-automovel-e-touring-clube-de-moc-campeonato-nacional-de-drift-2023",
+      "errors": []
+    },
+    {
+      "track_id": "jp-yamazoe-meihan-sportsland-d1gp-2005",
+      "errors": []
+    },
+    {
+      "track_id": "jp-niimi-bihoku-highland-circuit-d1gp-2002",
+      "errors": []
+    },
+    {
+      "track_id": "jp-honjo-honjo-circuit-drift-muscle-2014",
+      "errors": []
+    },
+    {
+      "track_id": "jp-obihiro-tokachi-speedway-d1gp-2018",
+      "errors": []
+    },
+    {
+      "track_id": "jp-omuta-sekia-hills-d1gp-2002",
+      "errors": []
+    },
+    {
+      "track_id": "us-englishtown-old-bridge-township-raceway-park-formula-drift-2025",
+      "errors": []
+    },
+    {
+      "track_id": "us-north-east-lake-erie-speedway-great-lakes-proam-2023",
+      "errors": []
+    },
+    {
+      "track_id": "us-fort-worth-texas-motor-speedway-formula-drift-2016",
+      "errors": []
+    },
+    {
+      "track_id": "us-miami-gardens-dolphin-stadium-d1-grand-prix-2006",
+      "errors": []
+    },
+    {
+      "track_id": "us-chicago-soldier-field-formula-drift-2005",
+      "errors": []
+    },
+    {
+      "track_id": "hu-mariapocs-rabocsi-ring-drift-masters-2018",
+      "errors": []
+    },
+    {
+      "track_id": "at-greinbach-ps-racing-center-drift-masters-2022",
+      "errors": []
+    },
+    {
+      "track_id": "ee-laitse-laitse-rallypark-estonian-drift-2019",
+      "errors": []
+    },
+    {
+      "track_id": "se-mantorp-mantorp-park-gatebil-2024",
+      "errors": []
+    },
+    {
+      "track_id": "au-melbourne-calder-park-raceway-australian-drift-grand-prix-2013",
+      "errors": []
+    },
+    {
+      "track_id": "au-benalla-winton-motor-raceway-hi-tec-drift-allstars-2024",
+      "errors": []
+    },
+    {
+      "track_id": "au-sydney-sydney-motorsport-park-world-time-attack-2023",
+      "errors": []
+    },
+    {
+      "track_id": "qa-doha-qatar-racing-club-red-bull-car-park-drift-2018",
+      "errors": []
+    },
+    {
+      "track_id": "bh-sakhir-bahrain-international-circuit-drift-2024",
       "errors": []
     }
   ]

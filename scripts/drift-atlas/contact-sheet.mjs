@@ -8,9 +8,9 @@ const ROOT = path.resolve(SCRIPT_DIR, '../..')
 const RESEARCH_DIR = path.join(ROOT, 'docs/research/global-drift-track-atlas')
 const PNG_DIR = path.join(ROOT, 'public/images/global-drift-track-atlas/png')
 const OUTPUT_DIR = path.join(ROOT, 'public/images/global-drift-track-atlas')
-const WIDTH = 2000
+const WIDTH = 3000
 const HEIGHT = 3000
-const COLS = 5
+const COLS = 10
 const ROWS = 10
 const CELL_WIDTH = WIDTH / COLS
 const CELL_HEIGHT = HEIGHT / ROWS
@@ -40,10 +40,10 @@ async function main() {
     const png = await readFile(path.join(PNG_DIR, `${track.track_id}.png`))
     const image = `data:image/png;base64,${png.toString('base64')}`
     cards.push(`<g transform="translate(${x} ${y})">
-      <rect x="10" y="10" width="380" height="280" rx="10" fill="#F1F4F5"/>
-      <image href="${image}" x="24" y="20" width="352" height="218" preserveAspectRatio="xMidYMid meet"/>
-      <text x="24" y="258" fill="#111827" font-family="Arial, sans-serif" font-size="18" font-weight="700">${escapeXml(String(index + 1).padStart(2, '0'))} · ${escapeXml(truncate(track.display_name))}</text>
-      <text x="24" y="279" fill="#52606D" font-family="Arial, sans-serif" font-size="13">${escapeXml(track.country_or_region)} · ${escapeXml(track.event_year)} · ${escapeXml(track.series)}</text>
+      <rect x="7" y="7" width="286" height="286" rx="8" fill="#F1F4F5"/>
+      <image href="${image}" x="15" y="15" width="270" height="205" preserveAspectRatio="xMidYMid meet"/>
+      <text x="15" y="244" fill="#111827" font-family="Arial, sans-serif" font-size="12" font-weight="700">${escapeXml(String(index + 1).padStart(3, '0'))} · ${escapeXml(truncate(track.display_name, 27))}</text>
+      <text x="15" y="267" fill="#52606D" font-family="Arial, sans-serif" font-size="10">${escapeXml(track.country_or_region)} · ${escapeXml(track.event_year)}</text>
     </g>`)
   }
 
@@ -56,7 +56,7 @@ async function main() {
   await mkdir(OUTPUT_DIR, { recursive: true })
   await writeFile(path.join(OUTPUT_DIR, 'contact-sheet.svg'), svg)
   await writeFile(path.join(OUTPUT_DIR, 'contact-sheet.png'), png)
-  console.log('Generated 5×10 atlas contact sheet.')
+  console.log('Generated 10×10 atlas contact sheet.')
 }
 
 main().catch((error) => {

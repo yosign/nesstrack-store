@@ -4,12 +4,13 @@ import originalMediaManifest from '@/docs/research/global-drift-track-atlas/orig
 import DriftAtlasClient, { type AtlasTrack } from './DriftAtlasClient'
 
 export const metadata: Metadata = {
-  title: 'Global Drift Atlas — 50 Real Track Views | NessRC',
-  description: '全球 50 条知名漂移赛事赛道的真实卫星与航拍俯视图档案，覆盖 29 个国家和地区。',
+  title: 'Global Drift Atlas — 100 Real Track Views | NessRC',
+  description: '全球 100 条知名漂移赛事赛道的真实卫星与航拍俯视图档案，覆盖 42 个国家和地区。',
 }
 
 export default function DriftAtlasPage() {
   const mediaById = new Map(originalMediaManifest.tracks.map((media) => [media.track_id, media]))
+  const mediaVersion = originalMediaManifest.generated_at.replace(/\D/g, '').slice(0, 14)
   const tracks: AtlasTrack[] = atlasManifest.tracks.map((track) => {
     const media = mediaById.get(track.track_id)
     return {
@@ -34,7 +35,8 @@ export default function DriftAtlasPage() {
       features: track.judged_features,
       tags: track.diversity_tags,
       score: track.selection_score,
-      originalImage: media?.local_path ?? null,
+      evidenceStatus: track.evidence_status,
+      originalImage: media?.local_path ? `${media.local_path}?v=${mediaVersion}` : null,
       mediaType: media?.media_type ?? 'unavailable',
       mediaLabel: media?.media_label ?? '原始画面待补',
       mediaAttribution: media?.attribution ?? '',

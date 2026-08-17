@@ -11,21 +11,20 @@ const SVG_DIR = path.join(ROOT, 'public/images/global-drift-track-atlas/svg')
 const PNG_DIR = path.join(ROOT, 'public/images/global-drift-track-atlas/png')
 const QA_DIR = path.join(RESEARCH_DIR, 'qa')
 
-const REGION_QUOTAS = {
-  japan: 10,
-  'north-america': 10,
-  europe: 12,
-  oceania: 5,
-  'asia-other': 6,
-  'latin-america': 4,
-  'middle-east-africa': 3,
+const REGION_MINIMUMS = {
+  japan: 18,
+  'north-america': 18,
+  europe: 20,
+  oceania: 8,
+  'asia-other': 8,
+  'latin-america': 6,
+  'middle-east-africa': 7,
 }
-const TIER_QUOTAS = { international: 28, national: 16, historic: 6 }
+const EXPECTED_TRACKS = 100
 const REQUIRED_GROUPS = ['background', 'context', 'course', 'zones', 'markers', 'labels']
 const TRACK_ID_PATTERN = /^[a-z]{2}-[a-z0-9-]+-[0-9]{4}(?:-[ab])?$/
 
 const countBy = (items, key) => items.reduce((counts, item) => ({ ...counts, [item[key]]: (counts[item[key]] ?? 0) + 1 }), {})
-const sameCounts = (actual, expected) => Object.entries(expected).every(([key, value]) => actual[key] === value)
 const sha256 = (buffer) => createHash('sha256').update(buffer).digest('hex')
 
 function validateRecord(track, allIds) {
@@ -37,16 +36,22 @@ function validateRecord(track, allIds) {
   if (!Number.isInteger(track.event_year)) errors.push('event_year must be an integer')
   if (!Array.isArray(track.sources) || track.sources.length === 0) errors.push('sources are required')
   const routeSources = (track.sources ?? []).filter((source) => source.scope === 'course')
-  const hasStrongRouteSource = routeSources.some((source) => ['S', 'A'].includes(source.tier))
-  const hasTwoIndependentRouteSources = new Set(routeSources.filter((source) => ['A', 'B'].includes(source.tier)).map((source) => source.publisher)).size >= 2
-  if (!hasStrongRouteSource && !hasTwoIndependentRouteSources) errors.push('route evidence requires one S/A source or two independent A/B sources')
+  const venueSources = (track.sources ?? []).filter((source) => source.scope === 'venue')
+  if (track.evidence_status === 'source-threshold-met') {
+    const hasStrongRouteSource = routeSources.some((source) => ['S', 'A'].includes(source.tier))
+    const hasTwoIndependentRouteSources = new Set(routeSources.filter((source) => ['A', 'B'].includes(source.tier)).map((source) => source.publisher)).size >= 2
+    if (!hasStrongRouteSource && !hasTwoIndependentRouteSources) errors.push('route evidence requires one S/A source or two independent A/B sources')
+  } else if (track.evidence_status === 'event-venue-confirmed') {
+    if (routeSources.length === 0 || venueSources.length === 0) errors.push('context-only records require event and venue sources')
+  } else {
+    errors.push('evidence_status is invalid')
+  }
   if (!Array.isArray(track.geometry?.course) || track.geometry.course.length < 4) errors.push('geometry.course needs at least 4 points')
   for (const [index, point] of (track.geometry?.course ?? []).entries()) {
     if (!Array.isArray(point) || point.length !== 2 || point.some((value) => !Number.isFinite(value))) errors.push(`course point ${index} is invalid`)
   }
-  if (track.evidence_status !== 'source-threshold-met') errors.push('evidence_status must confirm the desk-research source threshold')
   if (!['highest', 'high', 'medium'].includes(track.geometry_confidence)) errors.push('geometry_confidence is required')
-  if (track.geometry_review_status !== 'editorial-first-pass') errors.push('geometry_review_status must record the editorial first pass')
+  if (!['editorial-first-pass', 'editorial-context-only'].includes(track.geometry_review_status)) errors.push('geometry_review_status is invalid')
   if (track.status !== 'complete') errors.push('status must be complete')
   return errors
 }
@@ -86,16 +91,14 @@ async function main() {
   const renderData = JSON.parse(await readFile(path.join(QA_DIR, 'render-results.json'), 'utf8'))
   const renderResults = new Map(renderData.tracks.map((record) => [record.track_id, record]))
 
-  if (tracks.length !== 50) report.errors.push(`Expected 50 complete tracks, received ${tracks.length}`)
+  if (tracks.length !== EXPECTED_TRACKS) report.errors.push(`Expected ${EXPECTED_TRACKS} complete tracks, received ${tracks.length}`)
   const regions = countBy(tracks, 'atlas_region')
-  const tiers = countBy(tracks, 'event_tier')
-  if (!sameCounts(regions, REGION_QUOTAS)) report.errors.push(`Regional quotas do not match: ${JSON.stringify(regions)}`)
-  if (!sameCounts(tiers, TIER_QUOTAS)) report.errors.push(`Event-tier quotas do not match: ${JSON.stringify(tiers)}`)
-  if (new Set(tracks.map((track) => track.iso_country_code)).size < 20) report.errors.push('Fewer than 20 countries/regions')
-  if (new Set(tracks.map((track) => track.venue_name)).size < 30) report.errors.push('Fewer than 30 distinct venues')
-  if (tracks.filter((track) => ['street', 'parking'].includes(track.venue_type)).length < 10) report.errors.push('Fewer than 10 temporary/street/parking courses')
-  for (const [series, count] of Object.entries(countBy(tracks, 'series'))) if (count > 10) report.errors.push(`Series ${series} exceeds 10 entries`)
-  for (const [country, count] of Object.entries(countBy(tracks, 'iso_country_code'))) if (count > 10) report.errors.push(`Country ${country} exceeds 10 entries`)
+  for (const [region, minimum] of Object.entries(REGION_MINIMUMS)) if ((regions[region] ?? 0) < minimum) report.errors.push(`Region ${region} has ${regions[region] ?? 0}; minimum is ${minimum}`)
+  if (new Set(tracks.map((track) => track.iso_country_code)).size < 30) report.errors.push('Fewer than 30 countries/regions')
+  if (new Set(tracks.map((track) => track.venue_name)).size < 75) report.errors.push('Fewer than 75 distinct venues')
+  if (tracks.filter((track) => ['street', 'parking', 'stadium'].includes(track.venue_type)).length < 15) report.errors.push('Fewer than 15 temporary/street/parking/stadium courses')
+  for (const [series, count] of Object.entries(countBy(tracks, 'series'))) if (count > 20) report.errors.push(`Series ${series} exceeds 20 entries`)
+  for (const [country, count] of Object.entries(countBy(tracks, 'iso_country_code'))) if (count > 22) report.errors.push(`Country ${country} exceeds 22 entries`)
   for (const [venue, count] of Object.entries(countBy(tracks, 'venue_name'))) if (count > 2) report.errors.push(`Venue ${venue} exceeds 2 entries`)
 
   for (const track of tracks) {
@@ -105,15 +108,15 @@ async function main() {
   }
 
   const [svgFiles, pngFiles] = await Promise.all([readdir(SVG_DIR), readdir(PNG_DIR)])
-  if (svgFiles.filter((file) => file.endsWith('.svg')).length !== 50) report.errors.push('SVG directory does not contain exactly 50 SVG files')
-  if (pngFiles.filter((file) => file.endsWith('.png')).length !== 50) report.errors.push('PNG directory does not contain exactly 50 PNG files')
+  if (svgFiles.filter((file) => file.endsWith('.svg')).length !== EXPECTED_TRACKS) report.errors.push(`SVG directory does not contain exactly ${EXPECTED_TRACKS} SVG files`)
+  if (pngFiles.filter((file) => file.endsWith('.png')).length !== EXPECTED_TRACKS) report.errors.push(`PNG directory does not contain exactly ${EXPECTED_TRACKS} PNG files`)
 
   await writeFile(path.join(QA_DIR, 'technical-validation.json'), `${JSON.stringify(report, null, 2)}\n`)
   if (report.errors.length > 0) {
     console.error(`Atlas validation failed with ${report.errors.length} error(s).`)
     process.exitCode = 1
   } else {
-    console.log('Atlas validation passed: 50 verified SVG/PNG pairs and all quotas satisfied.')
+    console.log(`Atlas validation passed: ${EXPECTED_TRACKS} verified SVG/PNG pairs and all diversity minimums satisfied.`)
   }
 }
 

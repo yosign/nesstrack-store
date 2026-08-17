@@ -1,8 +1,9 @@
 # Global Drift Competition Course Atlas
 
-This atlas contains a worldwide research register, 50 real venue/event images,
-and 50 original editorial top-view redraws of competition-specific drift-course
-variants. The real imagery is the default web view; redraws are a separate,
+This atlas contains a worldwide research register, 100 tightly framed real
+venue aerial images, and 100 original editorial top-view reference layers for
+competition-specific or venue-context drift-course variants. The real imagery
+is the default web view; reference layers are a separate,
 optional annotation layer. It is intended
 for track discovery, cataloguing and design reference—not event operations,
 safety planning, manufacturing or survey work.
@@ -10,28 +11,31 @@ safety planning, manufacturing or survey work.
 ## Deliverables
 
 - `candidate-register.csv`: 81 event/year/venue candidates.
-- `manifest.json` and `manifest.csv`: the untouched 50-row research selection.
-- `production-manifest.json`: the 50 rendered records with normalized quotas,
+- `manifest.json` and `manifest.csv`: the untouched original 50-row research selection.
+- `extension-manifest.json`: the 50-track worldwide extension with event and venue evidence.
+- `production-manifest.json`: all 100 rendered records with normalized quotas,
   source objects, route geometry, confidence and output status.
-- `original-media-manifest.json`: 50 real-image records with media type, local
+- `original-media-manifest.json`: 100 real-image records with media type, local
   path, source URL and visible attribution.
 - `source-register.csv`: 169 claim-level source records.
 - `tracks/`: 65 selected and backup research notes.
 - `qa/`: render hashes, technical validation and review registers.
-- `public/images/global-drift-track-atlas/svg/`: exactly 50 editable 1600×1200 SVGs.
-- `public/images/global-drift-track-atlas/png/`: exactly 50 transparent 1600×1200 PNGs.
-- `public/images/global-drift-track-atlas/contact-sheet.{svg,png}`: 5×10 visual index.
-- `public/images/global-drift-track-atlas/original/`: exactly 50 real venue
+- `public/images/global-drift-track-atlas/svg/`: exactly 100 editable 1600×1200 SVGs.
+- `public/images/global-drift-track-atlas/png/`: exactly 100 transparent 1600×1200 PNGs.
+- `public/images/global-drift-track-atlas/contact-sheet.{svg,png}`: 10×10 visual index.
+- `public/images/global-drift-track-atlas/original/`: exactly 100 tightly framed real venue
   satellite views. Temporary parcels are identified from cited event addresses
   or venue records before imagery is generated.
 
 ## Evidence and confidence
 
-All selected entries meet the desk-research route-source threshold: one S/A
+The original 50 selected entries meet the desk-research route-source threshold: one S/A
 course source or two independent A/B course sources, plus separate venue
 context. Six 2026 Drift Masters layouts and three 2026 Formula Drift layouts
 have the strongest official route-map evidence. Other records are editorial
 first-pass reconstructions from cited competition footage and venue context.
+The 50-track extension confirms event and venue identity; its route layer is
+explicitly labelled as editorial context rather than exact event geometry.
 
 `geometry_confidence` is deliberately explicit:
 
@@ -41,7 +45,7 @@ first-pass reconstructions from cited competition footage and venue context.
   exact coordinates, radii, widths and clip-zone placement require primary-source
   revalidation before precision use.
 
-The 50 diagrams encode an original normalized centerline and annotations. Real
+The 100 diagrams encode an original normalized centerline and annotations. Real
 venue imagery is stored separately from those diagrams and is never presented
 as event-day barrier or clipping-zone geometry. Esri/imagery-provider credit or
 the event-media publisher is displayed directly on the web view.
@@ -67,5 +71,5 @@ The research manifest intentionally remains `source-threshold-met` rather than
 claiming independent survey-grade geometry approval. Bangkok 2012's precise
 temporary parcel, stable OSM object IDs, and representative timecodes for some
 older video sources remain useful follow-up work. These limitations do not
-affect the technical completeness of the 50-file editorial atlas, but they do
+affect the technical completeness of the 100-file editorial atlas, but they do
 limit precision use.

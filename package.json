@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "drift-atlas:build": "node scripts/drift-atlas/build-production-manifest.mjs",
+    "drift-atlas:build": "node scripts/drift-atlas/build-production-manifest.mjs && node scripts/drift-atlas/expand-production-manifest.mjs",
     "drift-atlas:render": "node scripts/drift-atlas/render-atlas.mjs",
     "drift-atlas:validate": "node scripts/drift-atlas/validate-atlas.mjs",
     "drift-atlas:contact-sheet": "node scripts/drift-atlas/contact-sheet.mjs"
