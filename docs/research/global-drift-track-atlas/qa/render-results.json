@@ -1,0 +1,355 @@
+{
+  "generated_at": "2026-08-17T09:51:01.014Z",
+  "tracks": [
+    {
+      "track_id": "jp-maibara-okuibuki-motor-park-d1gp-2024",
+      "svg_sha256": "101c3e6392bfbeb67291638c39d5176d06ce27c1fdbad698c321b568924929ab",
+      "png_sha256": "7670eebd8644747a809b72c347375f789248229a158634127db3bbcda8cbf878",
+      "svg_bytes": 4266,
+      "png_bytes": 80973
+    },
+    {
+      "track_id": "jp-shimotsuma-tsukuba-circuit-d1gp-2024",
+      "svg_sha256": "45d82b146326e6f2e876e80c1a74e72cd061c98ed3c1d23ab9619cdeb8ec284c",
+      "png_sha256": "85feff800e8ed9dbaded565f2d2f56290c9902b81ca9cca57fb63fb9bcc0a627",
+      "svg_bytes": 4030,
+      "png_bytes": 71568
+    },
+    {
+      "track_id": "jp-nihonmatsu-ebisu-circuit-west-course-d1gp-2024",
+      "svg_sha256": "dcd910d79da06c825c9e0a10498c837ecbad7b950cbd2c390c94faf7dd597e19",
+      "png_sha256": "53616f1d9f8cd53ba306d93476f886a544c69e24cbbf8542ad7d037afe9f0dc8",
+      "svg_bytes": 4240,
+      "png_bytes": 74947
+    },
+    {
+      "track_id": "jp-hita-autopolis-d1gp-2024",
+      "svg_sha256": "97ea9953edd7e222c7fcb7eb49d53ed861bb08c6ec54a5a2fe6de9a01de84c62",
+      "png_sha256": "d1ba9c6c9d10d25723cdda5bc9e298329720dfa22941f57b131a93681f3f41ba",
+      "svg_bytes": 4081,
+      "png_bytes": 79574
+    },
+    {
+      "track_id": "jp-tokyo-odaiba-special-venue-d1gp-2024",
+      "svg_sha256": "fe96bc2f4caa8c36bd1d1c7797d63ddc48a8c92bd5b2681944415daf92fe2404",
+      "png_sha256": "dbff95c91cbf79faf48fdcb0a710f93f65df6de639617d5fa0d023b30d64b903",
+      "svg_bytes": 4343,
+      "png_bytes": 81066
+    },
+    {
+      "track_id": "jp-oyama-fuji-speedway-formula-drift-japan-2024",
+      "svg_sha256": "9b3f6ba40b4ce107c8dcfa3094ca18d0f0f4275d356271b4502379c127bb14e7",
+      "png_sha256": "4adcb9f717d9e67dac0f66a44fa2f06a351e03a4e595702fd6b28a0eef874ad2",
+      "svg_bytes": 4047,
+      "png_bytes": 79248
+    },
+    {
+      "track_id": "jp-suzuka-suzuka-twin-circuit-formula-drift-japan-2024",
+      "svg_sha256": "32deb3ef5be194b46fccce6befb6297819845073103437ecf8c95a43ea02535e",
+      "png_sha256": "6073b822d9360169bdbdbec7e2404062e0e9215e351fc997c19a1dba022b3e28",
+      "svg_bytes": 4390,
+      "png_bytes": 77901
+    },
+    {
+      "track_id": "jp-nihonmatsu-ebisu-circuit-west-course-formula-drift-japan-2024",
+      "svg_sha256": "e1b9436d9aa674ac9f3f2a177045970883cb35e428dfe2d0220916254e4ba388",
+      "png_sha256": "4cf67ea7d879d4f91fcf559a8c20591993573849917cb1ce04d28554c0f5d337",
+      "svg_bytes": 4256,
+      "png_bytes": 75200
+    },
+    {
+      "track_id": "jp-murata-sportsland-sugo-formula-drift-japan-2024",
+      "svg_sha256": "82519a21c657c36e7fd4ee8384936fa87c86aa29382dc0c0e5ae7696aeb6dc20",
+      "png_sha256": "eec13112740e1c0ffb002759f3adfe73f486e95438f6e1d8322ec9883da3e131",
+      "svg_bytes": 4239,
+      "png_bytes": 77525
+    },
+    {
+      "track_id": "jp-mimasaka-okayama-international-circuit-formula-drift-japan-2024",
+      "svg_sha256": "d395738ec40ead60e965bc7782e5708e5e783dab7b7396bde2bbcca0e27c12d5",
+      "png_sha256": "886d35973612ced39aefaaf273127d360b766e9fc13d3be95ef626613f2a95f5",
+      "svg_bytes": 4268,
+      "png_bytes": 79417
+    },
+    {
+      "track_id": "us-long-beach-grand-prix-of-long-beach-street-super-drift-challenge-2024",
+      "svg_sha256": "36fd954b2dc6355b77dc292c360835b6435f2c7bc2e61a6613acca2cb9645313",
+      "png_sha256": "9522a0cb01f8f37e702c8acc2ac2808ad9cf2d812d61b13d5838771280885710",
+      "svg_bytes": 4333,
+      "png_bytes": 80748
+    },
+    {
+      "track_id": "us-braselton-michelin-raceway-road-atlanta-formula-drift-2026",
+      "svg_sha256": "ad7d18c77bde223444a5f562e0fcefe095cc06c19666016e77d73a21d493bbb9",
+      "png_sha256": "ad551793bc02e09bd824ee387dbb2d943dc5935ed1538bd9aeb4e56fba16d7c7",
+      "svg_bytes": 4086,
+      "png_bytes": 72781
+    },
+    {
+      "track_id": "us-orlando-orlando-speed-world-formula-drift-2026",
+      "svg_sha256": "c13fb5853f985a58d582753993011bbbd78f1882d3d9753c720de84a0fbcf92e",
+      "png_sha256": "602a0cbe36e6c1b2926a27744df6f5578b390be037895f3792175be7ad0155f6",
+      "svg_bytes": 4544,
+      "png_bytes": 93274
+    },
+    {
+      "track_id": "us-stafford-springs-stafford-motor-speedway-formula-drift-2026",
+      "svg_sha256": "27d6cd358fce8dfca6b0e932a88e87b545803c8c6241b1a2d57fab4ac2481433",
+      "png_sha256": "0546d7a327052291523caa53a68c71527e454c5842303dd09a7fce84b1c66b37",
+      "svg_bytes": 4326,
+      "png_bytes": 79245
+    },
+    {
+      "track_id": "us-madison-world-wide-technology-raceway-formula-drift-2024",
+      "svg_sha256": "6636e6dfcfd1f1016d1db80c5e9f8ab5a6be360abd780dab91d7b34562ad02f6",
+      "png_sha256": "8dd728bc7ba912c1f9ae9fbc472a7ac40682e63a5d15991cc4e3423eadd7b6d5",
+      "svg_bytes": 4102,
+      "png_bytes": 68612
+    },
+    {
+      "track_id": "us-monroe-evergreen-speedway-formula-drift-2024",
+      "svg_sha256": "33d512259bce62be9fe049bd08126f5f5ad061de6a3762f241b104169e4a93c0",
+      "png_sha256": "b92b40cbeac9760a890f77451b57fdce91b43bd39b4f114e1bfbaf20d5e2c76e",
+      "svg_bytes": 4331,
+      "png_bytes": 79714
+    },
+    {
+      "track_id": "us-las-vegas-las-vegas-motor-speedway-formula-drift-2012",
+      "svg_sha256": "194064d2a6f9054ca354e20407d4170c33176ae1bcfb2e45969bb9584c6a25c6",
+      "png_sha256": "acc06e33b65924c84047226bbc734c4aa52f544c35257bb8419e87363829c9bb",
+      "svg_bytes": 4193,
+      "png_bytes": 74549
+    },
+    {
+      "track_id": "us-irwindale-irwindale-speedway-formula-drift-2024",
+      "svg_sha256": "a170fafa1195e69a26519d3c173605555907b9894c77b97e11e40c8a4daeeb53",
+      "png_sha256": "f8b29e2708b3c22d74083520623286eceba18b89de80245b7d572507f3414a5e",
+      "svg_bytes": 4133,
+      "png_bytes": 89984
+    },
+    {
+      "track_id": "ca-montmagny-autodrome-montmagny-dmcc-2024",
+      "svg_sha256": "b0edc2fbee31bd2c2680986132a40ea9d7cc31d76e4fda8fa20c3ccad25b5732",
+      "png_sha256": "75cd3391aed57aabcfd8e92e85889e14784d3956d1d89bea2709b395165919d2",
+      "svg_bytes": 4434,
+      "png_bytes": 85912
+    },
+    {
+      "track_id": "mx-queretaro-autodromo-de-queretaro-mexican-drift-championship-2024",
+      "svg_sha256": "5152fdbe27d7212ff8058e62cb97dbac43c3cedaafb655c730c3d4d63301b247",
+      "png_sha256": "a4ca8353f420f9508320bad534303ef409796732ed8399ff6310ad5f6c884c36",
+      "svg_bytes": 4359,
+      "png_bytes": 70932
+    },
+    {
+      "track_id": "it-rome-autodromo-vallelunga-piero-taruf-drift-masters-2026",
+      "svg_sha256": "4f2ec700836f6c2f51594be1303ba12be1f3e9fa9d685e4c0230505f7af82e02",
+      "png_sha256": "c97c36a7ea32cb7979e4d6ca2c359e96083087fb676cf10fe5eb5b2fc1e0ed29",
+      "svg_bytes": 5746,
+      "png_bytes": 101131
+    },
+    {
+      "track_id": "es-madrid-circuito-de-madrid-jarama-race-drift-masters-2026",
+      "svg_sha256": "0c23dd74de3f8977c9de28b949ab820c504c97cbc1933908c01471f46d6a8d8c",
+      "png_sha256": "e1cdb007d4ba6faf69686984b908e00a4c4f0ebb88da1eb31c140971512e3c94",
+      "svg_bytes": 4920,
+      "png_bytes": 70554
+    },
+    {
+      "track_id": "ie-kildare-mondello-park-drift-masters-2026",
+      "svg_sha256": "40f22c81bfe97616ad8bc5aa3ab6eadfc23a733272a0b25cfa6f59909f35354a",
+      "png_sha256": "159a8514f4fff738e13b871fed6b2737e1b664db02eb523647351bd326a4618d",
+      "svg_bytes": 4781,
+      "png_bytes": 75829
+    },
+    {
+      "track_id": "fi-hameenlinna-ahvenisto-race-circuit-drift-masters-2026",
+      "svg_sha256": "135564ecdffb4405fa1b4e086158d1342db444f6746996d98bf1de98c7670bb5",
+      "png_sha256": "71fc9daef60c9f764b5c119c0c529f48a43bf364da7dd7e4b5458956733d0ab1",
+      "svg_bytes": 5031,
+      "png_bytes": 79856
+    },
+    {
+      "track_id": "lv-riga-bikernieki-circuit-drift-masters-2026",
+      "svg_sha256": "eb937267730eec641570f760e7502c9bcb7d7c066e5428af821cf70682a8e5df",
+      "png_sha256": "d3e3b92167e0651bf39f31935c5f48de89719c4ed65a2480a3c752cfe833e6ad",
+      "svg_bytes": 4543,
+      "png_bytes": 66904
+    },
+    {
+      "track_id": "de-grafenhainichen-ferropolis-drift-masters-2026",
+      "svg_sha256": "110b9d52673344903f093d953840ef562b98532fcedfd2a63456a708fb78e315",
+      "png_sha256": "475f92876151c19c6901e6498c086d8291b65fc61073338e7b308a5a5c684c70",
+      "svg_bytes": 5460,
+      "png_bytes": 104354
+    },
+    {
+      "track_id": "gb-liverpool-liverpool-waterfront-temporary-c-red-bull-drift-shifters-2018",
+      "svg_sha256": "ec42b7ba019d4362a4cca4bddf0c572f257111ad36d128e669097285be81073c",
+      "png_sha256": "99cff55a4f62df148f2d9747e8bf93cffd1ac188c4c8780ca38a17c20adcb712",
+      "svg_bytes": 4634,
+      "png_bytes": 88049
+    },
+    {
+      "track_id": "it-prato-prato-event-car-park-campionato-italiano-drifting-2026",
+      "svg_sha256": "7f50429c75f9eb4b939b4ad0927b712156f57ace25a6de6c44dc5615e67b294b",
+      "png_sha256": "d0168127d6559381f0d8c27d9ee64f31bb5ff9663f8802fe722538f4a1da2689",
+      "svg_bytes": 4129,
+      "png_bytes": 75498
+    },
+    {
+      "track_id": "de-nurburg-nurburgring-mullenbachschleife-nurburgring-drift-cup-2026",
+      "svg_sha256": "17c0d87e1abc3718b9cd3c1f86b7c75e03d5fb5f0b5f9716f4a6c99846daf7b8",
+      "png_sha256": "30eb9dc060b57131f2d50dad7d8531776f05b91d3985e4bb154d30511af7d189",
+      "svg_bytes": 4173,
+      "png_bytes": 68351
+    },
+    {
+      "track_id": "fr-croix-en-ternois-circuit-de-croix-en-ternois-championnat-de-france-de-drift-2024",
+      "svg_sha256": "c327d1c9fdeee84a75aba5aa0d660efe68e1da0dd6c545ad335d1703b51cf434",
+      "png_sha256": "654ad6620e7e736e2cb97ca07957945ac10fa506bb64954eaecf43d620080ca8",
+      "svg_bytes": 4338,
+      "png_bytes": 86782
+    },
+    {
+      "track_id": "gr-serres-serres-racing-circuit-drift-kings-2024",
+      "svg_sha256": "e033a0ab2ea617c57fc000eec94e18907b751299dbf2d100c1d61ee485ea3232",
+      "png_sha256": "dbac0222c52f6fcbe3c936497e5389dff1da0f8093a47db43493a2ff3efe2f25",
+      "svg_bytes": 4234,
+      "png_bytes": 68971
+    },
+    {
+      "track_id": "no-rakkestad-rudskogen-motorsenter-gatebil-breisladden-2020",
+      "svg_sha256": "dac51cec08e7df3afaa22c62655905d7c2cdb91faa888fdc27d286e795224828",
+      "png_sha256": "07162783c4217b83ee6304a4d7ac439b743dd755adf71f5da7e7eb4b59af33ad",
+      "svg_bytes": 4235,
+      "png_bytes": 79343
+    },
+    {
+      "track_id": "nz-taupo-taupo-international-motorsport-p-d1nz-2024",
+      "svg_sha256": "63a042fbfa6ab032aab9fe686d7e04dddb4819dc7cfa437294556ce02aaff03e",
+      "png_sha256": "49886eaab09989bc7128c00bd1b643d36c5e27002301d362f60da01faeb5c8eb",
+      "svg_bytes": 4083,
+      "png_bytes": 78842
+    },
+    {
+      "track_id": "nz-hampton-downs-hampton-downs-motorsport-park-d1nz-2024",
+      "svg_sha256": "24d2aafe9fd49b2f0e384ce094ab5883f35f65822bb936448ad6009ba5f24da8",
+      "png_sha256": "20981db9df440843c6b572b922030278bb6c001c40108bdaa4629327df77b6f2",
+      "svg_bytes": 4304,
+      "png_bytes": 77793
+    },
+    {
+      "track_id": "nz-feilding-manfeild-circuit-chris-amon-d1nz-2024",
+      "svg_sha256": "55ed37ede400fff2e8aa3767507535d6ed16e26faa470bbf626d7a6c4512931d",
+      "png_sha256": "e68b46a9141576042d779f511b3c433f9bd0ab4be60a71597b41f48fef86ebec",
+      "svg_bytes": 3861,
+      "png_bytes": 78371
+    },
+    {
+      "track_id": "nz-tauranga-baypark-stadium-d1nz-2026",
+      "svg_sha256": "a1e80a9d0e083c039e749d1e5d1b47a4071d1638e4544b4915ece709d1fd064b",
+      "png_sha256": "d04cca2b0d9be20b2eb1d557aed6f29baafb1f67c414b609c5595acc6c37ab1f",
+      "svg_bytes": 4404,
+      "png_bytes": 86203
+    },
+    {
+      "track_id": "au-willowbank-queensland-raceway-hi-tec-oils-drift-allstars-2024",
+      "svg_sha256": "559349f6e0951235c221c6da75207d0427a6a252dc2fc7b247a1d57e5f812c14",
+      "png_sha256": "867a1095fc415a529377956515c64ac6bd59b1a3667616b297aa31e7a77468e2",
+      "svg_bytes": 4157,
+      "png_bytes": 82403
+    },
+    {
+      "track_id": "sg-singapore-changi-exhibition-centre-formula-drift-asia-2012",
+      "svg_sha256": "36be856cc6d1e6409c86a45756ef9563c77bbcebbf0dde4c07d9e545ebddd26c",
+      "png_sha256": "616a67cb90950fc556317d199ea65f54b6a50daa8edc5d21434880b2a289a21a",
+      "svg_bytes": 4520,
+      "png_bytes": 80343
+    },
+    {
+      "track_id": "my-kuala-lumpur-speed-city-kl-formula-drift-asia-2012",
+      "svg_sha256": "5c007f118a85580e369323489a27bcfa2f725adf5ad6b85cf6807ded64aab2a6",
+      "png_sha256": "79fd026fcf3482bb8f2059899c733fa5f178ce0ed95d0740686152222140ba07",
+      "svg_bytes": 4511,
+      "png_bytes": 79476
+    },
+    {
+      "track_id": "th-bangkok-bangkok-temporary-drift-venue-formula-drift-asia-2012",
+      "svg_sha256": "7f31f1f4a81cf4cdd8a3c1b10257690e10bcf812479cf0272cac6f59031fd367",
+      "png_sha256": "1d75ca69db6f554d446e13ad99ebe986f388a360d2d9287a9a32a8b7de1767a1",
+      "svg_bytes": 4294,
+      "png_bytes": 76749
+    },
+    {
+      "track_id": "id-jakarta-jiexpo-kemayoran-formula-drift-asia-2011",
+      "svg_sha256": "61844c87dfcecb6cfed5ce8fbaf383be9ef462f04c20c6b3091153e82bbb94c4",
+      "png_sha256": "0eafbaf055e196d11baaf9cba34e4cfd80e5ea60d3e7f8ba9c22b4f4433648a6",
+      "svg_bytes": 4257,
+      "png_bytes": 70349
+    },
+    {
+      "track_id": "cn-beijing-beijing-d1-special-venue-d1-grand-prix-china-2016",
+      "svg_sha256": "d135554f37fad5c2a27ecc22fb2a30768802dcad07cfb7505e84b72b617db741",
+      "png_sha256": "f0b97a2d02fc3f1e87f97543bc595899839ace8d31d803a4c1791374b348aa3a",
+      "svg_bytes": 4479,
+      "png_bytes": 86828
+    },
+    {
+      "track_id": "tw-taichung-lihpao-racing-park-tdgp2-2026",
+      "svg_sha256": "9d42dff0a1c6ed7b0582515f6cb87ac3e1496998bdd2d5e10817d58158db263e",
+      "png_sha256": "e414a1cbee243012f35a3022a41935dee54d2a7d328497fbe3c5e313acd5c633",
+      "svg_bytes": 4134,
+      "png_bytes": 73145
+    },
+    {
+      "track_id": "br-londrina-autodromo-internacional-ayrton-s-ultimate-drift-2023",
+      "svg_sha256": "3a7db0d2911a07c0b6c4f6c0196886e33de3cb7b7ac3b60019355c4d86ccf573",
+      "png_sha256": "33538baf1f04ef23071b722c55c19c4f58ba6b98153e14f8f91cee2c3f8f5bc8",
+      "svg_bytes": 4396,
+      "png_bytes": 79693
+    },
+    {
+      "track_id": "ar-buenos-aires-autodromo-juan-y-oscar-galvez-drift-sudamerica-2017",
+      "svg_sha256": "190a78148227ae7cb1feae28415a08861a3507205e039989d02d9ba2025b8515",
+      "png_sha256": "4cdd4aac15c96ede7b2ff14fea6a9b0884b4b4db85fa4a763f3bcb84ced3f73c",
+      "svg_bytes": 4269,
+      "png_bytes": 78934
+    },
+    {
+      "track_id": "cl-san-antonio-autodromo-san-antonio-campeonato-nacional-de-drift-chi-2023",
+      "svg_sha256": "cd8662e978f3492dfe05dddcb2097f65339e51e2bf6047a4fe327f25c3bbc6f9",
+      "png_sha256": "d855ff5e058d355050607f06e7e906cdf7d8a6594c85f858bc6d290aff6525a0",
+      "svg_bytes": 4502,
+      "png_bytes": 70510
+    },
+    {
+      "track_id": "cr-alajuela-parque-viva-circuito-starcars-campeonato-nacional-de-drift-cos-2018",
+      "svg_sha256": "c2c062099f3be11e777f2d9e0732e77886654049145f5e664f8234b93952c2d3",
+      "png_sha256": "882b4ea7c8d5d14a2cc7f8449e06dfe298f19124298797b5f503a4cbb88dc14c",
+      "svg_bytes": 4349,
+      "png_bytes": 67824
+    },
+    {
+      "track_id": "om-muscat-muscat-drift-arena-oman-international-drift-champio-2024",
+      "svg_sha256": "4f8574baa44d3c9375c22fee082eecbd082ced218e1a45ec79f0e9e0f12600fe",
+      "png_sha256": "89aba1cc327fc57547124f98e723a79709dd62f8e0c12d353cb4e01bafcdf3d9",
+      "svg_bytes": 4572,
+      "png_bytes": 88611
+    },
+    {
+      "track_id": "sa-jeddah-jeddah-corniche-event-site-red-bull-car-park-drift-2022",
+      "svg_sha256": "063e6aed7b454ee6f3376debd2e4f7138e634e952ab30ab410c646527f125c90",
+      "png_sha256": "a807e7f6375d687088d32caf9bda3b8f7f40f466abb2a0a7d91cd41f221c39be",
+      "svg_bytes": 4213,
+      "png_bytes": 77059
+    },
+    {
+      "track_id": "za-port-shepstone-dezzi-raceway-supadrift-2016",
+      "svg_sha256": "bff3767cf0498cee719731820fd7e1ae999329d8766ae4fdddeaf6874756bfef",
+      "png_sha256": "19dbfdedaf437e7959c9a8b4764af8c975fe81cc02d739215d5db8051289f8d5",
+      "svg_bytes": 4245,
+      "png_bytes": 77812
+    }
+  ]
+}

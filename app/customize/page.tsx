@@ -98,6 +98,20 @@ export default function CustomizePage() {
             CUSTOM TRACK DESIGNER
           </span>
           <div style={{ flex: 1 }} />
+          <Link
+            href="/customize-v2"
+            style={{
+              padding: '7px 10px',
+              border: '1px solid rgba(217,255,67,0.55)',
+              color: '#d9ff43',
+              fontFamily: 'var(--font-bebas)',
+              fontSize: '0.72rem',
+              letterSpacing: '0.12em',
+              textDecoration: 'none',
+            }}
+          >
+            TRY V2
+          </Link>
           <Stepper step={step} onJump={(s) => setStep(s)} hasBbox={bbox !== null} hasSeed={seedDesign !== null} />
         </div>
       </header>
