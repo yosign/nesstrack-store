@@ -1,7 +1,9 @@
 # Global Drift Competition Course Atlas
 
-This atlas contains a worldwide research register plus 50 original editorial
-top-view redraws of competition-specific drift-course variants. It is intended
+This atlas contains a worldwide research register, 50 real venue/event images,
+and 50 original editorial top-view redraws of competition-specific drift-course
+variants. The real imagery is the default web view; redraws are a separate,
+optional annotation layer. It is intended
 for track discovery, cataloguing and design reference—not event operations,
 safety planning, manufacturing or survey work.
 
@@ -11,12 +13,16 @@ safety planning, manufacturing or survey work.
 - `manifest.json` and `manifest.csv`: the untouched 50-row research selection.
 - `production-manifest.json`: the 50 rendered records with normalized quotas,
   source objects, route geometry, confidence and output status.
+- `original-media-manifest.json`: 50 real-image records with media type, local
+  path, source URL and visible attribution.
 - `source-register.csv`: 169 claim-level source records.
 - `tracks/`: 65 selected and backup research notes.
 - `qa/`: render hashes, technical validation and review registers.
 - `public/images/global-drift-track-atlas/svg/`: exactly 50 editable 1600×1200 SVGs.
 - `public/images/global-drift-track-atlas/png/`: exactly 50 transparent 1600×1200 PNGs.
 - `public/images/global-drift-track-atlas/contact-sheet.{svg,png}`: 5×10 visual index.
+- `public/images/global-drift-track-atlas/original/`: 46 real venue satellite
+  views and 4 source-event frames for temporary venues without stable parcels.
 
 ## Evidence and confidence
 
@@ -34,8 +40,10 @@ first-pass reconstructions from cited competition footage and venue context.
   exact coordinates, radii, widths and clip-zone placement require primary-source
   revalidation before precision use.
 
-No official artwork, logos, screenshots or source frames are redistributed.
-The diagrams encode an original normalized centerline and annotations.
+The 50 diagrams encode an original normalized centerline and annotations. Real
+venue imagery is stored separately from those diagrams and is never presented
+as event-day barrier or clipping-zone geometry. Esri/imagery-provider credit or
+the event-media publisher is displayed directly on the web view.
 
 ## Rebuild and verify
 
@@ -44,6 +52,8 @@ npm run drift-atlas:build
 npm run drift-atlas:render
 npm run drift-atlas:contact-sheet
 npm run drift-atlas:validate
+node scripts/drift-atlas/build-original-media-manifest.mjs
+node scripts/drift-atlas/download-original-media.mjs
 ```
 
 The validator checks exact file counts, 1600×1200 dimensions, required SVG

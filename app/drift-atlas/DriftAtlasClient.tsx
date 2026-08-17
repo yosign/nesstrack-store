@@ -52,10 +52,17 @@ export type AtlasTrack = {
   features: string
   tags: string[]
   score: number
+  originalImage: string | null
+  mediaType: string
+  mediaLabel: string
+  mediaAttribution: string
+  mediaSourceUrl: string | null
+  mediaStatus: string
   sources: Source[]
 }
 
 type Props = { tracks: AtlasTrack[] }
+type ViewMode = 'original' | 'route'
 
 const REGION_LABELS: Record<string, string> = {
   japan: '日本',
@@ -90,7 +97,8 @@ function AtlasMark() {
   )
 }
 
-function TrackCard({ track, index, onOpen }: { track: AtlasTrack; index: number; onOpen: () => void }) {
+function TrackCard({ track, index, viewMode, onOpen }: { track: AtlasTrack; index: number; viewMode: ViewMode; onOpen: () => void }) {
+  const isOriginal = viewMode === 'original' && track.originalImage
   return (
     <button className={styles.card} onClick={onOpen} type="button">
       <span className={styles.cardTopline}>
@@ -99,13 +107,15 @@ function TrackCard({ track, index, onOpen }: { track: AtlasTrack; index: number;
       </span>
       <span className={styles.trackStage}>
         <Image
-          src={`${imageBase}/png/${track.id}.png`}
-          alt={`${track.name} 漂移路线俯视图`}
+          src={isOriginal ? track.originalImage! : `${imageBase}/png/${track.id}.png`}
+          alt={isOriginal ? `${track.venue} 真实场地俯视原图` : `${track.name} 路线标注图`}
           width={1600}
           height={1200}
           sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
-          className={styles.trackImage}
+          className={`${styles.trackImage} ${isOriginal ? styles.originalImage : styles.routeImage}`}
         />
+        <span className={styles.mediaBadge} data-media={track.mediaType}>{isOriginal ? track.mediaLabel : '路线标注层'}</span>
+        {isOriginal && <span className={styles.imageCredit}>{track.mediaAttribution}</span>}
         <span className={styles.cardOpen}><ArrowUpRight size={16} /></span>
       </span>
       <span className={styles.cardBody}>
@@ -122,6 +132,7 @@ function TrackCard({ track, index, onOpen }: { track: AtlasTrack; index: number;
 }
 
 function TrackModal({ track, onClose }: { track: AtlasTrack; onClose: () => void }) {
+  const [viewMode, setViewMode] = useState<ViewMode>('original')
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -134,6 +145,7 @@ function TrackModal({ track, onClose }: { track: AtlasTrack; onClose: () => void
   }, [onClose])
 
   const courseSources = track.sources.filter((source) => source.scope === 'course')
+  const isOriginal = viewMode === 'original' && track.originalImage
 
   return (
     <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
@@ -145,20 +157,28 @@ function TrackModal({ track, onClose }: { track: AtlasTrack; onClose: () => void
         <div className={styles.modalVisual}>
           <div className={styles.modalIndex}>{track.countryCode}<br /><span>{track.year}</span></div>
           <Image
-            src={`${imageBase}/png/${track.id}.png`}
-            alt={`${track.name} 漂移路线大图`}
+            src={isOriginal ? track.originalImage! : `${imageBase}/png/${track.id}.png`}
+            alt={isOriginal ? `${track.venue} 真实场地俯视原图` : `${track.name} 路线标注大图`}
             width={1600}
             height={1200}
             sizes="(max-width: 900px) 100vw, 58vw"
-            className={styles.modalImage}
+            className={`${styles.modalImage} ${isOriginal ? styles.modalOriginalImage : styles.modalRouteImage}`}
             priority
           />
-          <div className={styles.legend}>
+          <div className={styles.modalViewToggle} aria-label="图片类型">
+            <button className={viewMode === 'original' ? styles.activeView : ''} onClick={() => setViewMode('original')} type="button">真实原图</button>
+            <button className={viewMode === 'route' ? styles.activeView : ''} onClick={() => setViewMode('route')} type="button">路线标注</button>
+          </div>
+          <div className={styles.modalMediaMeta}>
+            <b>{isOriginal ? track.mediaLabel : '编辑路线标注层'}</b>
+            {isOriginal && <span>{track.mediaAttribution}</span>}
+          </div>
+          {!isOriginal && <div className={styles.legend}>
             <span><i className={styles.startDot} />起点</span>
             <span><i className={styles.finishDot} />终点</span>
             <span><i className={styles.outerDot} />外区</span>
             <span><i className={styles.innerDot} />内区</span>
-          </div>
+          </div>}
         </div>
 
         <div className={styles.modalContent}>
@@ -167,6 +187,7 @@ function TrackModal({ track, onClose }: { track: AtlasTrack; onClose: () => void
           <p className={styles.modalLocation}><MapPin size={15} />{track.city}, {track.country} · {track.year}</p>
 
           <div className={styles.modalBadges}>
+            <span>{track.mediaLabel}</span>
             <span data-confidence={track.confidence}>{CONFIDENCE_LABELS[track.confidence]}</span>
             <span>{track.venueType}</span>
             <span>评分 {track.score}</span>
@@ -190,12 +211,18 @@ function TrackModal({ track, onClose }: { track: AtlasTrack; onClose: () => void
             </div>
           )}
 
+          {track.mediaSourceUrl && (
+            <a className={styles.originalSource} href={track.mediaSourceUrl} target="_blank" rel="noreferrer">
+              查看这张原图对应的赛事来源 <ArrowUpRight size={16} />
+            </a>
+          )}
+
           <div className={styles.downloads}>
-            <a href={`${imageBase}/svg/${track.id}.svg`} download><ArrowDownToLine size={17} />下载 SVG</a>
-            <a href={`${imageBase}/png/${track.id}.png`} download><ArrowDownToLine size={17} />下载 PNG</a>
+            <a href={`${imageBase}/svg/${track.id}.svg`} download><ArrowDownToLine size={17} />路线标注 SVG</a>
+            <a href={`${imageBase}/png/${track.id}.png`} download><ArrowDownToLine size={17} />路线标注 PNG</a>
           </div>
 
-          <p className={styles.disclaimer}>编辑级路线重绘，用于资料检索与设计参考；不作为赛事安全或工程测绘依据。</p>
+          <p className={styles.disclaimer}>真实场地影像用于识别赛道环境；路线标注是独立编辑参考层，不代表卫星拍摄当日的赛事布置，也不作为工程测绘依据。</p>
         </div>
       </section>
     </div>
@@ -207,6 +234,7 @@ export default function DriftAtlasClient({ tracks }: Props) {
   const [region, setRegion] = useState('all')
   const [tier, setTier] = useState('all')
   const [confidence, setConfidence] = useState('all')
+  const [viewMode, setViewMode] = useState<ViewMode>('original')
   const [selectedTrack, setSelectedTrack] = useState<AtlasTrack | null>(null)
 
   const regionCounts = useMemo(() => tracks.reduce<Record<string, number>>((counts, track) => {
@@ -239,15 +267,15 @@ export default function DriftAtlasClient({ tracks }: Props) {
 
       <header className={styles.header}>
         <Link href="/" className={styles.brand}><AtlasMark /><span>NESS<em>RC</em></span></Link>
-        <div className={styles.headerTitle}><span>Global Drift Archive</span><i />全球漂移赛事路线档案</div>
+        <div className={styles.headerTitle}><span>Global Drift Archive</span><i />全球漂移赛道原图档案</div>
         <Link href="/" className={styles.back}><ArrowLeft size={16} />返回商店</Link>
       </header>
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
           <p className={styles.kicker}><Sparkles size={15} />Worldwide course research · Vol. 01</p>
-          <h1>漂移路线<br /><span>世界图鉴</span></h1>
-          <p>从大场地里拆出真正比赛使用的短赛段。50 条路线，跨越 29 个国家和地区，全部统一重绘、统一标记、可下载。</p>
+          <h1>漂移赛道<br /><span>真实图鉴</span></h1>
+          <p>50 条真实场地卫星 / 航拍与赛事原始画面，跨越 29 个国家和地区。默认看原图，需要时再切换独立的路线标注层。</p>
         </div>
 
         <div className={styles.heroStats}>
@@ -298,13 +326,16 @@ export default function DriftAtlasClient({ tracks }: Props) {
 
         <div className={styles.galleryHead}>
           <div><Map size={18} /><span>当前显示</span><strong>{filteredTracks.length}</strong><span>/ {tracks.length} 条路线</span></div>
-          <span>点击卡片查看路线资料与下载</span>
+          <div className={styles.viewToggle} aria-label="图库图片类型">
+            <button className={viewMode === 'original' ? styles.activeView : ''} onClick={() => setViewMode('original')} type="button">真实原图</button>
+            <button className={viewMode === 'route' ? styles.activeView : ''} onClick={() => setViewMode('route')} type="button">路线标注</button>
+          </div>
         </div>
 
         {filteredTracks.length > 0 ? (
           <div className={styles.gallery}>
             {filteredTracks.map((track) => (
-              <TrackCard key={track.id} track={track} index={tracks.indexOf(track)} onOpen={() => setSelectedTrack(track)} />
+              <TrackCard key={track.id} track={track} index={tracks.indexOf(track)} viewMode={viewMode} onOpen={() => setSelectedTrack(track)} />
             ))}
           </div>
         ) : (
@@ -319,8 +350,8 @@ export default function DriftAtlasClient({ tracks }: Props) {
 
       <footer className={styles.footer}>
         <div><AtlasMark /><strong>NessRC Drift Atlas</strong></div>
-        <p>Original editorial redraws · SVG / PNG · 1600 × 1200</p>
-        <span>资料参考用途，不作为工程测绘依据。</span>
+        <p>Real venue imagery · Optional editorial route overlays</p>
+        <span>原图来源与影像署名均在详情页显示。</span>
       </footer>
 
       {selectedTrack && <TrackModal track={selectedTrack} onClose={() => setSelectedTrack(null)} />}

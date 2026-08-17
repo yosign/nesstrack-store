@@ -293,6 +293,12 @@
 .galleryHead div { display: flex; align-items: center; gap: 9px; }
 .galleryHead svg { color: var(--cyan); }
 .galleryHead strong { margin: 0 2px 0 8px; color: var(--paper); font-family: var(--font-bebas), sans-serif; font-size: 1.75rem; font-weight: 400; }
+.viewToggle,
+.modalViewToggle { display: inline-flex; padding: 3px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.035); }
+.viewToggle button,
+.modalViewToggle button { min-height: 34px; padding: 0 13px; border: 0; color: #7f8c8f; background: transparent; font: inherit; font-size: .67rem; cursor: pointer; }
+.viewToggle .activeView,
+.modalViewToggle .activeView { color: #07100e; background: var(--cyan); }
 
 .gallery {
   display: grid;
@@ -327,9 +333,7 @@
   aspect-ratio: 4 / 3;
   margin: 0 10px;
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgba(53,232,202,.025), transparent 45%),
-    #e7edeb;
+  background: #111a1d;
   clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
 }
 
@@ -343,8 +347,13 @@
   opacity: .25;
 }
 
-.trackImage { width: 100%; height: 100%; object-fit: contain; transition: transform .55s cubic-bezier(.2,.8,.2,1); }
+.trackImage { width: 100%; height: 100%; transition: transform .55s cubic-bezier(.2,.8,.2,1); }
+.originalImage { object-fit: cover; filter: saturate(.88) contrast(1.05); }
+.routeImage { object-fit: contain; background: #e7edeb; }
 .card:hover .trackImage { transform: scale(1.075) rotate(-1deg); }
+.mediaBadge { position: absolute; left: 10px; top: 10px; z-index: 3; padding: 7px 9px; color: #07100e; background: var(--cyan); font-size: .58rem; font-weight: 700; letter-spacing: .04em; }
+.mediaBadge[data-media='source-event-frame'] { background: var(--lime); }
+.imageCredit { position: absolute; z-index: 3; left: 10px; right: 10px; bottom: 8px; overflow: hidden; color: rgba(255,255,255,.72); font-size: .48rem; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 5px #000; }
 .cardOpen { position: absolute; right: 0; top: 0; z-index: 2; display: grid; place-items: center; width: 38px; height: 38px; color: var(--ink); background: var(--lime); transform: translate(100%,-100%); transition: transform .25s ease; }
 .card:hover .cardOpen { transform: translate(0,0); }
 
@@ -375,12 +384,17 @@
 .modalClose { position: absolute; top: 14px; right: 14px; z-index: 4; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid rgba(255,255,255,.14); color: var(--paper); background: rgba(7,11,13,.8); cursor: pointer; }
 .modalClose:hover { color: var(--ink); background: var(--lime); }
 
-.modalVisual { position: relative; display: grid; min-height: 620px; place-items: center; overflow: hidden; background: #e8eeec; }
+.modalVisual { position: relative; display: grid; min-height: 620px; place-items: center; overflow: hidden; background: #101719; }
 .modalVisual::after { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(7,11,13,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(7,11,13,.05) 1px, transparent 1px); background-size: 32px 32px; }
-.modalImage { position: relative; z-index: 1; width: 92%; height: 88%; object-fit: contain; }
+.modalImage { position: relative; z-index: 1; width: 100%; height: 100%; }
+.modalOriginalImage { object-fit: cover; filter: saturate(.9) contrast(1.04); }
+.modalRouteImage { width: 92%; height: 88%; object-fit: contain; }
+.modalViewToggle { position: absolute; right: 70px; top: 16px; z-index: 3; background: rgba(7,11,13,.82); backdrop-filter: blur(12px); }
+.modalMediaMeta { position: absolute; z-index: 3; left: 24px; bottom: 20px; display: flex; max-width: calc(100% - 48px); flex-direction: column; gap: 3px; padding: 10px 12px; color: white; background: rgba(7,11,13,.74); font-size: .58rem; backdrop-filter: blur(10px); }
+.modalMediaMeta b { color: var(--cyan); font-size: .65rem; }
 .modalIndex { position: absolute; left: 24px; top: 20px; z-index: 2; color: rgba(7,11,13,.7); font-family: var(--font-bebas), sans-serif; font-size: 2rem; line-height: .85; }
 .modalIndex span { color: rgba(7,11,13,.35); font-size: 1rem; letter-spacing: .1em; }
-.legend { position: absolute; left: 24px; bottom: 20px; z-index: 2; display: flex; gap: 16px; padding: 9px 11px; color: #283235; background: rgba(255,255,255,.7); font-size: .62rem; backdrop-filter: blur(12px); }
+.legend { position: absolute; right: 24px; bottom: 20px; z-index: 3; display: flex; gap: 16px; padding: 9px 11px; color: #283235; background: rgba(255,255,255,.8); font-size: .62rem; backdrop-filter: blur(12px); }
 .legend span { display: flex; align-items: center; gap: 5px; }
 .legend i { width: 8px; height: 8px; border-radius: 50%; }
 .startDot { background: #22c55e; }.finishDot { background: #ef4444; }.outerDot { border: 2px solid #a855f7; }.innerDot { border: 2px solid #f59e0b; }
@@ -405,6 +419,8 @@
 .sources a span { min-width: 0; }
 .sources a b { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 8px; color: var(--ink); background: var(--cyan); font-size: .62rem; }
 .sources small { display: block; margin: 4px 0 0 30px; color: #647174; font-size: .6rem; }
+.originalSource { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding: 12px 14px; border: 1px solid rgba(203,255,61,.35); color: var(--lime); text-decoration: none; font-size: .68rem; }
+.originalSource:hover { color: var(--ink); background: var(--lime); }
 
 .downloads { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 27px; }
 .downloads a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border: 1px solid var(--cyan); color: var(--cyan); text-decoration: none; font-size: .7rem; }
@@ -455,13 +471,19 @@
   .filterRail { margin-left: -10px; margin-right: -10px; padding: 13px 10px; }
   .selectRow { grid-template-columns: 1fr; }
   .galleryHead > span { display: none; }
+  .galleryHead { align-items: flex-end; gap: 12px; padding: 18px 0; }
+  .galleryHead > div:first-child { flex-wrap: wrap; }
+  .viewToggle button { padding: 0 9px; }
   .gallery { grid-template-columns: 1fr; }
   .cardBody { min-height: 112px; }
   .cardBody strong { font-size: 1.55rem; }
   .modalVisual { min-height: 43vh; }
   .modalContent { padding: 32px 18px 50px; }
-  .legend { left: 10px; bottom: 10px; gap: 9px; }
+  .legend { right: 10px; bottom: 10px; gap: 9px; }
   .modalIndex { left: 14px; top: 14px; }
+  .modalViewToggle { right: 58px; top: 10px; }
+  .modalViewToggle button { padding: 0 9px; }
+  .modalMediaMeta { left: 10px; bottom: 10px; max-width: calc(100% - 20px); }
   .downloads { grid-template-columns: 1fr; }
 }
 
